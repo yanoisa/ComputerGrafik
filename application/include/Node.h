@@ -8,25 +8,27 @@
 class Node
 {
 public:
-    //Constructor, safe brauche ich noch ein paar 
     Node();
     Node(const std::string& name, Node* parent);
-    //Getter und Setter die keiner braucht
+    virtual ~Node(); // WICHTIG für Polymorphismus
+
     Node* getParent();
     void setParent(Node* parent);
-    Node* getChildren(std::string& name);
+
+    Node* getChildren(const std::string& name);
     const std::list<Node*>& getChildren() const;
+
     std::string getName();
     std::string getPath();
     int getDepth();
+
     glm::mat4 getLocalTransform();
     glm::mat4 getWorldTransform();
     void setLocalTransform(glm::mat4& localTransform);
     void setWorldTransform(glm::mat4& globalTransform);
 
-    //ich sehe mich hier failen
-    void addChildren(Node* children);
-    Node* removeChildren(std::string& name);
+    void addChild(Node* child);
+    Node* removeChild(const std::string& name);
 
 private:
     Node* parent_;
