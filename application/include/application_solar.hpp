@@ -23,7 +23,7 @@ class ApplicationSolar : public Application {
 
   // draw all objects
   void render() const;
-  void renderNode(Node* node, glm::mat4 const& parent_transform) const;
+  void renderNode(Node* node, glm::mat4 parent_transform) const;
 
  protected:
   SceneGraph scenegraph_;

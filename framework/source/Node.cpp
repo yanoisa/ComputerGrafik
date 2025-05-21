@@ -98,10 +98,10 @@ void Node::setLocalTransform(glm::mat4 localTransform) {
 //here we look also for the parents WorldTransform because that is for the child important too
 void Node::setWorldTransform(glm::mat4& globalTransform) {
     if (parent_) {
-        localTransform_ = glm::inverse(parent_->getWorldTransform()) * globalTransform;
+        worldTransform_ = glm::inverse(parent_->getWorldTransform()) * globalTransform;
     }
     else {
-        localTransform_ = globalTransform;
+        worldTransform_ = globalTransform;
     }
 }
 

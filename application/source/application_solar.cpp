@@ -37,7 +37,7 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
   scenegraph_ = solarSystem;
   
   Node* rootNode = new Node();
-  rootNode->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(0.0f, 2.0f, 0.0f)));
+  rootNode->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(0.0f, 1.0f, 0.0f)));
   solarSystem.setRoot(rootNode);
   model planet_model = model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL);
   //LightSource
@@ -45,35 +45,37 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
   sunLight->setLightColor(glm::vec3(1.0, 1.0, 0.8)); // Yellowish light
   sunLight->setLightIntensity(10.0f);
   sunLight->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(3.0f, 10.0f, 3.0f)));
-
-  // Sun geometry (optional, if the sun is visible)
-  GeometryNode* sunGeom = new GeometryNode("SunGeom", rootNode);
-  sunGeom->setGeometry(&planet_model);
-  sunLight->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(0.0f)));
-  rootNode->addChildren(sunLight);
   //Camera 
   CameraNode* camera = new CameraNode("Camera", rootNode, true);
+
+
+
   Node* mercHold = new Node("mercHold", rootNode);
   GeometryNode* mercGeom = new GeometryNode("mercGeom", mercHold);
+  mercGeom->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(5.0f, 0.0f, 0.0f)));
   Node* venHold = new Node("venHold", rootNode);
   GeometryNode* venGeom = new GeometryNode("venGeom", venHold);
+  venGeom->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(7.0f, 0.0f, 0.0f)));
   Node* earthHold = new Node("earthHold", rootNode);
   GeometryNode* earthGeom = new GeometryNode("earthGeom", earthHold);
+  earthGeom->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(9.0f, 0.0f, 0.0f)));
   Node* moonHold = new Node("moonHold", earthGeom);
   GeometryNode* moonGeom = new GeometryNode("Moon", moonHold);
-
-
-
   Node* marsHold = new Node("marsHold", rootNode);
   GeometryNode* marsGeom = new GeometryNode("marsGeom", marsHold);
+  marsGeom->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(11.0f, 0.0f, 0.0f)));
   Node* jupitHold = new Node("jupitHold", rootNode);
   GeometryNode* jupitGeom = new GeometryNode("jupitGeom", jupitHold);
+  jupitGeom->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(13.0f, 0.0f, 0.0f)));
   Node* satHold = new Node("satHold", rootNode);
   GeometryNode* satGeom = new GeometryNode("satGeom", satHold);
+  satGeom->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(15.0f, 0.0f, 0.0f)));
   Node* uranHold = new Node("uranHold", rootNode);
   GeometryNode* uranGeom = new GeometryNode("uranGeom", uranHold);
+  uranGeom->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(17.0f, 0.0f, 0.0f)));
   Node* neptHold = new Node("neptHold", rootNode);
   GeometryNode* neptGeom = new GeometryNode("neptGeom", neptHold);
+  neptGeom->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(19.0f, 0.0f, 0.0f)));
   mercGeom->setGeometry(&planet_model);
   venGeom->setGeometry(&planet_model);
   earthGeom->setGeometry(&planet_model);
@@ -94,7 +96,7 @@ ApplicationSolar::~ApplicationSolar() {
   glDeleteBuffers(1, &planet_object.element_BO);
   glDeleteVertexArrays(1, &planet_object.vertex_AO);
 }
-
+/*
 void ApplicationSolar::render() const {
   // bind shader to upload uniforms
   glUseProgram(m_shaders.at("planet").handle);
@@ -114,20 +116,28 @@ void ApplicationSolar::render() const {
 
   // draw bound vertex array using bound shader
   glDrawElements(planet_object.draw_mode, planet_object.num_elements, model::INDEX.type, NULL);
-}
+}*/
 
-
-/*
 void ApplicationSolar::render() const {
-    // Shader aktivieren
     glUseProgram(m_shaders.at("planet").handle);
 
+    // Render manually animated planet
+    glm::fmat4 model_matrix = glm::rotate(glm::fmat4{}, float(glfwGetTime()), glm::fvec3{ 0.0f, 1.0f, 0.0f });
+    model_matrix = glm::translate(model_matrix, glm::fvec3{ 0.0f, 0.0f, -1.0f });
+    glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ModelMatrix"),
+        1, GL_FALSE, glm::value_ptr(model_matrix));
 
-    // Root-Node des SceneGraph holen und rendern
-    if (scenegraph_.getRoot()) {
-        renderNode(scenegraph_.getRoot(), glm::mat4(1.0f));  // Identitätsmatrix als Start
-    }
-*/
+    glm::fmat4 normal_matrix = glm::inverseTranspose(glm::inverse(m_view_transform) * model_matrix);
+    glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("NormalMatrix"),
+        1, GL_FALSE, glm::value_ptr(normal_matrix));
+
+    glBindVertexArray(planet_object.vertex_AO);
+    glDrawElements(planet_object.draw_mode, planet_object.num_elements, model::INDEX.type, NULL);
+    
+    renderNode(scenegraph_.getRoot(), glm::mat4(1.0f)); // Render with identity parent transform
+    
+}
+
 
 void ApplicationSolar::uploadView() {
   // vertices are transformed in camera space, so camera transform must be inverted
@@ -154,22 +164,11 @@ void ApplicationSolar::uploadUniforms() {
   PointLightNode* sunLight = nullptr;
   sunLight = dynamic_cast<PointLightNode*>(root->getChildren("SunLight"));
   
+  //Extracting the values for the point light
   glm::mat4 sunWorldTransform = sunLight->getWorldTransform();
-  glm::vec3 light_position = glm::vec3(sunWorldTransform[3]);  // translation column
   glm::vec3 light_color = sunLight->getLightColor();
   float light_intensity = sunLight->getLightIntensity();
-  std::cout << "Light Position: ("
-      << light_position.x << ", "
-      << light_position.y << ", "
-      << light_position.z << ")\n";
-
-  std::cout << "Light Color: ("
-      << light_color.r << ", "
-      << light_color.g << ", "
-      << light_color.b << ")\n";
-
-  std::cout << "Light Intensity: " << light_intensity << "\n";
-  
+  glm::vec3 light_position = glm::vec3(sunWorldTransform[3]);  // translation column
 
   glUniform3fv(glGetUniformLocation(m_shaders.at("planet").handle, "LightPosition"), 1, glm::value_ptr(light_position));
   glUniform3fv(glGetUniformLocation(m_shaders.at("planet").handle, "LightColor"), 1, glm::value_ptr(light_color));
@@ -296,29 +295,38 @@ void ApplicationSolar::resizeCallback(unsigned width, unsigned height) {
   uploadProjection();
 }
 
-void ApplicationSolar::renderNode(Node* node, glm::mat4 const& parent_transform) const {
-    glm::mat4 model_matrix = parent_transform * node->getLocalTransform();
+void ApplicationSolar::renderNode(Node* node, glm::mat4 parent_transform) const {
+    glm::mat4 local_transform = node->getLocalTransform();
 
-    // Zeichne, falls GeometryNode
-    if (auto geometry_node = dynamic_cast<GeometryNode*>(node)) {
-        model const* geom_model = geometry_node->getGeometry();
+    // Example: rotate mercHold dynamically around Y axis
+    float angle = glfwGetTime(); // dynamic angle in seconds
+    glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0, 1, 0));
+    local_transform = rotation * local_transform;  // rotate around its center
+    
+
+    glm::mat4 current_transform = parent_transform * local_transform;
+
+    if (auto geo_node = dynamic_cast<GeometryNode*>(node)) {
+        glUseProgram(m_shaders.at("planet").handle);
 
         glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ModelMatrix"),
-            1, GL_FALSE, glm::value_ptr(model_matrix));
+            1, GL_FALSE, glm::value_ptr(current_transform));
 
-        glm::mat4 normal_matrix = glm::inverseTranspose(glm::inverse(m_view_transform) * model_matrix);
+        glm::mat4 normal_matrix = glm::inverseTranspose(glm::inverse(m_view_transform) * current_transform);
         glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("NormalMatrix"),
             1, GL_FALSE, glm::value_ptr(normal_matrix));
 
-        // Rendern (aktuell alle mit planet_object VAO, könnte angepasst werden!)
         glBindVertexArray(planet_object.vertex_AO);
         glDrawElements(planet_object.draw_mode, planet_object.num_elements, model::INDEX.type, nullptr);
     }
 
     for (Node* child : node->getChildrenList()) {
-        renderNode(child, model_matrix);
+        renderNode(child, current_transform);
     }
 }
+
+
+
 
 
 
@@ -326,7 +334,7 @@ void ApplicationSolar::renderNode(Node* node, glm::mat4 const& parent_transform)
 int main(int argc, char* argv[]) {
   //Setup SceneGraph
     Node* root = new Node();
-    root->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(5.0f, 0.0f, 0.0f)));
+    root->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(0.0f, 0.0f, 0.0f)));
 
     Node* child = new Node("Child", root);
     child->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(0.0f, 3.0f, 0.0f)));
