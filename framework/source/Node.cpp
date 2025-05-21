@@ -91,7 +91,8 @@ glm::mat4 Node::getWorldTransform() {
     return localTransform_;
 }
 
-void Node::setLocalTransform(glm::mat4& localTransform) {
+
+void Node::setLocalTransform(glm::mat4 localTransform) {
     localTransform_ = localTransform;
 }
 //here we look also for the parents WorldTransform because that is for the child important too

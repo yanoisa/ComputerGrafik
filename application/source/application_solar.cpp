@@ -37,18 +37,33 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
   scenegraph_ = solarSystem;
   
   Node* rootNode = new Node();
+  rootNode->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(0.0f, 2.0f, 0.0f)));
   solarSystem.setRoot(rootNode);
+  model planet_model = model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL);
+  //LightSource
+  PointLightNode* sunLight = new PointLightNode("SunLight", rootNode);
+  sunLight->setLightColor(glm::vec3(1.0, 1.0, 0.8)); // Yellowish light
+  sunLight->setLightIntensity(10.0f);
+  sunLight->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(3.0f, 10.0f, 3.0f)));
 
+  // Sun geometry (optional, if the sun is visible)
+  GeometryNode* sunGeom = new GeometryNode("SunGeom", rootNode);
+  sunGeom->setGeometry(&planet_model);
+  sunLight->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(0.0f)));
+  rootNode->addChildren(sunLight);
   //Camera 
   CameraNode* camera = new CameraNode("Camera", rootNode, true);
-
   Node* mercHold = new Node("mercHold", rootNode);
-
   GeometryNode* mercGeom = new GeometryNode("mercGeom", mercHold);
   Node* venHold = new Node("venHold", rootNode);
   GeometryNode* venGeom = new GeometryNode("venGeom", venHold);
   Node* earthHold = new Node("earthHold", rootNode);
   GeometryNode* earthGeom = new GeometryNode("earthGeom", earthHold);
+  Node* moonHold = new Node("moonHold", earthGeom);
+  GeometryNode* moonGeom = new GeometryNode("Moon", moonHold);
+
+
+
   Node* marsHold = new Node("marsHold", rootNode);
   GeometryNode* marsGeom = new GeometryNode("marsGeom", marsHold);
   Node* jupitHold = new Node("jupitHold", rootNode);
@@ -59,7 +74,6 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
   GeometryNode* uranGeom = new GeometryNode("uranGeom", uranHold);
   Node* neptHold = new Node("neptHold", rootNode);
   GeometryNode* neptGeom = new GeometryNode("neptGeom", neptHold);
-  model planet_model = model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL);
   mercGeom->setGeometry(&planet_model);
   venGeom->setGeometry(&planet_model);
   earthGeom->setGeometry(&planet_model);
@@ -68,14 +82,9 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
   satGeom->setGeometry(&planet_model);
   uranGeom->setGeometry(&planet_model);
   neptGeom->setGeometry(&planet_model);
-  mercHold->setLocalTransform(glm::translate(glm::mat4(1.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
-  venHold->setLocalTransform(glm::translate(glm::mat4(1.0f), glm::vec3(2.0f, 0.0f, 0.0f)));
-  earthGeom->setLocalTransform(glm::translate(glm::mat4(1.0f), glm::vec3(3.0f, 0.0f, 0.0f)));
-  marsHold->setLocalTransform(glm::translate(glm::mat4(1.0f), glm::vec3(4.0f, 0.0f, 0.0f)));
-  jupitGeom->setLocalTransform(glm::translate(glm::mat4(1.0f), glm::vec3(5.0f, 0.0f, 0.0f)));
-  satHold->setLocalTransform(glm::translate(glm::mat4(1.0f), glm::vec3(6.0f, 0.0f, 0.0f)));
-  uranGeom->setLocalTransform(glm::translate(glm::mat4(1.0f), glm::vec3(7.0f, 0.0f, 0.0f)));
-  neptHold->setLocalTransform(glm::translate(glm::mat4(1.0f), glm::vec3(2.0f, 0.0f, 0.0f)));
+  moonGeom->setGeometry(&planet_model);
+  scenegraph_ = solarSystem;
+
   initializeGeometry();
   initializeShaderPrograms();
 }
@@ -141,6 +150,31 @@ void ApplicationSolar::uploadUniforms() {
   // upload uniform values to new locations
   uploadView();
   uploadProjection();
+  Node* root = scenegraph_.getRoot();
+  PointLightNode* sunLight = nullptr;
+  sunLight = dynamic_cast<PointLightNode*>(root->getChildren("SunLight"));
+  
+  glm::mat4 sunWorldTransform = sunLight->getWorldTransform();
+  glm::vec3 light_position = glm::vec3(sunWorldTransform[3]);  // translation column
+  glm::vec3 light_color = sunLight->getLightColor();
+  float light_intensity = sunLight->getLightIntensity();
+  std::cout << "Light Position: ("
+      << light_position.x << ", "
+      << light_position.y << ", "
+      << light_position.z << ")\n";
+
+  std::cout << "Light Color: ("
+      << light_color.r << ", "
+      << light_color.g << ", "
+      << light_color.b << ")\n";
+
+  std::cout << "Light Intensity: " << light_intensity << "\n";
+  
+
+  glUniform3fv(glGetUniformLocation(m_shaders.at("planet").handle, "LightPosition"), 1, glm::value_ptr(light_position));
+  glUniform3fv(glGetUniformLocation(m_shaders.at("planet").handle, "LightColor"), 1, glm::value_ptr(light_color));
+  GLint loc_intensity = glGetUniformLocation(m_shaders.at("planet").handle, "LightIntensity");
+  glUniform1f(loc_intensity, light_intensity);
 }
 
 ///////////////////////////// intialisation functions /////////////////////////
@@ -228,6 +262,7 @@ void ApplicationSolar::keyCallback(int key, int action, int mods) {
 //handle delta mouse movement input
 //it rotates quite extreme. So therefore if the spehre is not visible anymore it is a good idea to 
 void ApplicationSolar::mouseCallback(double pos_x, double pos_y) {
+
     if (firstMouse_) {
         lastMouseX_ = pos_x;
         lastMouseY_ = pos_y;
@@ -290,36 +325,25 @@ void ApplicationSolar::renderNode(Node* node, glm::mat4 const& parent_transform)
 // exe entry point
 int main(int argc, char* argv[]) {
   //Setup SceneGraph
-  SceneGraph solarSystem("Solar System");
-  Node* rootNode = new Node();
-  solarSystem.setRoot(rootNode);
+    Node* root = new Node();
+    root->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(5.0f, 0.0f, 0.0f)));
 
-  //Camera 
-  CameraNode* camera = new CameraNode("Camera", rootNode, true);
+    Node* child = new Node("Child", root);
+    child->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(0.0f, 3.0f, 0.0f)));
 
-  Node* mercHold = new Node("mercHold", rootNode);
+    glm::vec3 root_pos = glm::vec3(root->getWorldTransform()[3]);   // (5, 0, 0)
+    glm::vec3 child_pos = glm::vec3(child->getWorldTransform()[3]); // (5, 3, 0)
+
+    std::cout << "Light Position: ("
+        << root_pos.x << ", "
+        << root_pos.y << ", "
+        << root_pos.z << ")\n";
+
+    std::cout << "Light Position: ("
+        << child_pos.x << ", "
+        << child_pos.y << ", "
+        << child_pos.z << ")\n";
   
-  GeometryNode* mercGeom = new GeometryNode("mercGeom",mercHold);
-  Node* venHold = new Node("venHold", rootNode);
-  GeometryNode* venGeom = new GeometryNode("venGeom", venHold);
-  Node* earthHold = new Node("earthHold", rootNode);
-  GeometryNode* earthGeom = new GeometryNode("earthGeom", earthHold);
-  Node* marsHold = new Node("marsHold", rootNode);
-  GeometryNode* marsGeom = new GeometryNode("marsGeom", marsHold);
-  Node* jupitHold = new Node("jupitHold", rootNode);
-  GeometryNode* jupitGeom = new GeometryNode("jupitGeom", jupitHold);
-  Node* satHold = new Node("satHold", rootNode);
-  GeometryNode* satGeom = new GeometryNode("satGeom", satHold);
-  Node* uranHold = new Node("uranHold", rootNode);
-  GeometryNode* uranGeom = new GeometryNode("uranGeom", uranHold);
-  Node* neptHold = new Node("neptHold", rootNode);
-  GeometryNode* neptGeom = new GeometryNode("neptGeom", neptHold);
-  
-  const std::list<Node*>& temp = rootNode->getChildrenList();
-  for (Node* node : temp)
-  {
-      std::cout << node->getName() << "\n";
-  }
 
   Application::run<ApplicationSolar>(argc, argv, 3, 2);
 }

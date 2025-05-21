@@ -24,7 +24,7 @@ public:
 
     glm::mat4 getLocalTransform();
     glm::mat4 getWorldTransform();
-    void setLocalTransform(glm::mat4& localTransform);
+    void setLocalTransform(glm::mat4 localTransform);
     void setWorldTransform(glm::mat4& globalTransform);
 
     void addChildren(Node* child);
