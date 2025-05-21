@@ -24,6 +24,7 @@ class ApplicationSolar : public Application {
   // draw all objects
   void render() const;
   void renderNode(Node* node, glm::mat4 parent_transform) const;
+  glm::vec3 getPlanetColor(const std::string& name) const;
 
  protected:
   SceneGraph scenegraph_;

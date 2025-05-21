@@ -29,6 +29,8 @@ public:
 
     void addChildren(Node* child);
     Node* removeChild(const std::string& name);
+    void setRotationSpeed(float speed);
+    float getRotationSpeed();
 
 private:
     //the _ for the member variables is that setter and getter are easier to construct with less confusion
@@ -39,5 +41,6 @@ private:
     int depth_;
     glm::mat4 localTransform_;
     glm::mat4 worldTransform_;
+    float rotationSpeed_ = 0.1f;
 };
 #endif

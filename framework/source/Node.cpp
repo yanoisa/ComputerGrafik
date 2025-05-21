@@ -25,6 +25,12 @@ Node::Node(const std::string& name, Node* parent) :
         path_ = name_;
     }
 }
+void Node::setRotationSpeed(float speed) {
+    rotationSpeed_ = speed;
+}
+float Node::getRotationSpeed() {
+    return rotationSpeed_;
+}
 
 //deleting also with all the childs
 Node::~Node() {
