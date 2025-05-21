@@ -11,10 +11,11 @@ class GeometryNode : public Node
 public:
     GeometryNode(const std::string& name, Node* parent);
 
-    void setmodel(model const* geometry);
-    model const* getmodel() const;
+    void setGeometry(model const* geometry);
+    model const* getGeometry() const;
 
 private:
+    //the model is to use at the end the sphere.obj it is the same class used in application solar
     model const* geometry_;
 };
 

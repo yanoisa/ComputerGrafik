@@ -29,6 +29,9 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
  ,planet_object{}
  ,m_view_transform{glm::translate(glm::fmat4{}, glm::fvec3{0.0f, 0.0f, 4.0f})}
  ,m_view_projection{utils::calculate_projection_matrix(initial_aspect_ratio)}
+ ,lastMouseX_{0.0}
+ ,lastMouseY_{0.0}
+ ,firstMouse_{true}
 {
   SceneGraph solarSystem("Solar System");
   scenegraph_ = solarSystem;
@@ -56,6 +59,23 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
   GeometryNode* uranGeom = new GeometryNode("uranGeom", uranHold);
   Node* neptHold = new Node("neptHold", rootNode);
   GeometryNode* neptGeom = new GeometryNode("neptGeom", neptHold);
+  model planet_model = model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL);
+  mercGeom->setGeometry(&planet_model);
+  venGeom->setGeometry(&planet_model);
+  earthGeom->setGeometry(&planet_model);
+  marsGeom->setGeometry(&planet_model);
+  jupitGeom->setGeometry(&planet_model);
+  satGeom->setGeometry(&planet_model);
+  uranGeom->setGeometry(&planet_model);
+  neptGeom->setGeometry(&planet_model);
+  mercHold->setLocalTransform(glm::translate(glm::mat4(1.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
+  venHold->setLocalTransform(glm::translate(glm::mat4(1.0f), glm::vec3(2.0f, 0.0f, 0.0f)));
+  earthGeom->setLocalTransform(glm::translate(glm::mat4(1.0f), glm::vec3(3.0f, 0.0f, 0.0f)));
+  marsHold->setLocalTransform(glm::translate(glm::mat4(1.0f), glm::vec3(4.0f, 0.0f, 0.0f)));
+  jupitGeom->setLocalTransform(glm::translate(glm::mat4(1.0f), glm::vec3(5.0f, 0.0f, 0.0f)));
+  satHold->setLocalTransform(glm::translate(glm::mat4(1.0f), glm::vec3(6.0f, 0.0f, 0.0f)));
+  uranGeom->setLocalTransform(glm::translate(glm::mat4(1.0f), glm::vec3(7.0f, 0.0f, 0.0f)));
+  neptHold->setLocalTransform(glm::translate(glm::mat4(1.0f), glm::vec3(2.0f, 0.0f, 0.0f)));
   initializeGeometry();
   initializeShaderPrograms();
 }
@@ -86,6 +106,19 @@ void ApplicationSolar::render() const {
   // draw bound vertex array using bound shader
   glDrawElements(planet_object.draw_mode, planet_object.num_elements, model::INDEX.type, NULL);
 }
+
+
+/*
+void ApplicationSolar::render() const {
+    // Shader aktivieren
+    glUseProgram(m_shaders.at("planet").handle);
+
+
+    // Root-Node des SceneGraph holen und rendern
+    if (scenegraph_.getRoot()) {
+        renderNode(scenegraph_.getRoot(), glm::mat4(1.0f));  // Identitätsmatrix als Start
+    }
+*/
 
 void ApplicationSolar::uploadView() {
   // vertices are transformed in camera space, so camera transform must be inverted
@@ -172,12 +205,52 @@ void ApplicationSolar::keyCallback(int key, int action, int mods) {
     m_view_transform = glm::translate(m_view_transform, glm::fvec3{0.0f, 0.0f, 0.1f});
     uploadView();
   }
+  // The other four are only copy and paste and a different key and a different row of the Matrix
+  else if (key == GLFW_KEY_A && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+      m_view_transform = glm::translate(m_view_transform, glm::fvec3{ -0.1f, 0.0f, 0.0f });
+      uploadView();
+  }
+  else if (key == GLFW_KEY_D && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+      m_view_transform = glm::translate(m_view_transform, glm::fvec3{ 0.1f, 0.0f, 0.0f });
+      uploadView();
+  }
+  else if (key == GLFW_KEY_Y && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+      m_view_transform = glm::translate(m_view_transform, glm::fvec3{ 0.0f, 0.1f, 0.0f });
+      uploadView();
+  }
+  else if (key == GLFW_KEY_X && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+      m_view_transform = glm::translate(m_view_transform, glm::fvec3{ 0.0f, -0.1f, 0.0f });
+      uploadView();
+  }
 }
 
 //handle delta mouse movement input
+//it rotates quite extreme. So therefore if the spehre is not visible anymore it is a good idea to 
 void ApplicationSolar::mouseCallback(double pos_x, double pos_y) {
-  // mouse handling
+    if (firstMouse_) {
+        lastMouseX_ = pos_x;
+        lastMouseY_ = pos_y;
+        firstMouse_ = false;
+    }
+    //calculating of the difference of the mouse 
+    float deltax = pos_x - lastMouseX_;
+    float deltay = lastMouseY_ - pos_y;
+    lastMouseX_ = pos_x;
+    lastMouseY_ = pos_y;
+    
+    //const float sensitivity = 0.1f;
+    //xoffset *= sensitivity;
+    //yoffset *= sensitivity;
+
+    glm::vec3 right = glm::vec3(m_view_transform[0]);
+    glm::vec3 up = glm::vec3(m_view_transform[1]);
+
+    m_view_transform = glm::rotate(m_view_transform, glm::radians(deltax), up);
+    m_view_transform = glm::rotate(m_view_transform, glm::radians(deltay), right);
+
+    uploadView();
 }
+
 
 //handle resizing
 void ApplicationSolar::resizeCallback(unsigned width, unsigned height) {
@@ -186,6 +259,31 @@ void ApplicationSolar::resizeCallback(unsigned width, unsigned height) {
   // upload new projection matrix
   uploadProjection();
 }
+
+void ApplicationSolar::renderNode(Node* node, glm::mat4 const& parent_transform) const {
+    glm::mat4 model_matrix = parent_transform * node->getLocalTransform();
+
+    // Zeichne, falls GeometryNode
+    if (auto geometry_node = dynamic_cast<GeometryNode*>(node)) {
+        model const* geom_model = geometry_node->getGeometry();
+
+        glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ModelMatrix"),
+            1, GL_FALSE, glm::value_ptr(model_matrix));
+
+        glm::mat4 normal_matrix = glm::inverseTranspose(glm::inverse(m_view_transform) * model_matrix);
+        glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("NormalMatrix"),
+            1, GL_FALSE, glm::value_ptr(normal_matrix));
+
+        // Rendern (aktuell alle mit planet_object VAO, könnte angepasst werden!)
+        glBindVertexArray(planet_object.vertex_AO);
+        glDrawElements(planet_object.draw_mode, planet_object.num_elements, model::INDEX.type, nullptr);
+    }
+
+    for (Node* child : node->getChildrenList()) {
+        renderNode(child, model_matrix);
+    }
+}
+
 
 
 // exe entry point

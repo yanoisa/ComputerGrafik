@@ -31,6 +31,7 @@ public:
     Node* removeChild(const std::string& name);
 
 private:
+    //the _ for the member variables is that setter and getter are easier to construct with less confusion
     Node* parent_;
     std::string name_;
     std::list<Node*> children_;

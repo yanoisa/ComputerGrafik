@@ -23,6 +23,7 @@ class ApplicationSolar : public Application {
 
   // draw all objects
   void render() const;
+  void renderNode(Node* node, glm::mat4 const& parent_transform) const;
 
  protected:
   SceneGraph scenegraph_;
@@ -42,6 +43,9 @@ class ApplicationSolar : public Application {
   glm::fmat4 m_view_transform;
   // camera projection matrix
   glm::fmat4 m_view_projection;
+  //They are used for mouse handling
+  double lastMouseX_ = 0.0, lastMouseY_ = 0.0;
+  bool firstMouse_ = true;
 };
 
 #endif

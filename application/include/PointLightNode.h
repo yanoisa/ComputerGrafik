@@ -4,6 +4,7 @@
 #include "Node.h"
 #include <glm/glm.hpp>
 
+//Only the things which are different are implemented
 class PointLightNode : public Node
 {
 public:
