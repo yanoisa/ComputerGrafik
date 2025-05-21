@@ -1,29 +1,18 @@
-#version 330 core
+#version 330 core // GLSL version 3.30 core profile.
 
-// Input vertex attributes: position and normal
-layout(location = 0) in vec3 position;
-layout(location = 1) in vec3 normal;
+layout(location = 0) in vec3 in_position; // Vertex position (model space).
+layout(location = 1) in vec3 in_normal;   // Vertex normal (model space).
 
-// Uniform matrices for transformations
-uniform mat4 ModelMatrix;       // Model transformation matrix (model space -> world space)
-uniform mat4 ViewMatrix;        // View matrix (world space -> camera/view space)
-uniform mat4 ProjectionMatrix;  // Projection matrix (camera space -> clip space)
-uniform mat4 NormalMatrix;      // Matrix to correctly transform normals (usually inverse transpose of ModelMatrix)
+uniform mat4 ModelMatrix;      // Model to world transformation.
+uniform mat4 ViewMatrix;       // World to camera transformation.
+uniform mat4 ProjectionMatrix; // Camera to clip space transformation.
+uniform mat4 NormalMatrix;     // Normal transformation to camera space.
 
-// Output variables to fragment shader
-out vec3 vNormal;    // Transformed normal vector in world space
-out vec3 vPosition;  // Position of the vertex in world space
+out vec3 frg_normal;    // Interpolated normal for fragment shader (camera space).
+out vec3 frg_position;  // Interpolated position for fragment shader (camera space).
 
 void main() {
-    // Transform vertex position from model space to world space
-    vec4 worldPosition = ModelMatrix * vec4(position, 1.0);
-
-    // Pass world space position to fragment shader
-    vPosition = vec3(worldPosition);
-
-    // Transform normal vector using NormalMatrix and normalize it
-    vNormal = normalize(mat3(NormalMatrix) * normal);
-
-    // Calculate final clip space position by applying projection and view transformations
-    gl_Position = ProjectionMatrix * ViewMatrix * worldPosition;
+    frg_position = vec3(ViewMatrix * ModelMatrix * vec4(in_position, 1.0)); // Transform position to camera space.
+    frg_normal = normalize(vec3(NormalMatrix * vec4(in_normal, 0.0)));     // Transform and normalize normal to camera space.
+    gl_Position = ProjectionMatrix * ViewMatrix * ModelMatrix * vec4(in_position, 1.0); // Final vertex position in clip space.
 }
