@@ -47,7 +47,7 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
   sunLight->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(0.0f, 0.0f, 0.0f)));
   //Camera 
   CameraNode* camera = new CameraNode("Camera", rootNode, true);
-
+  camera->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(10.0f, 0.0f, 20.0f)));
 
   //for the scaling factors was a mixture from actual relationships and what look nice
   Node* mercHold = new Node("mercHold", rootNode);
@@ -141,20 +141,6 @@ void ApplicationSolar::render() const {
 void ApplicationSolar::render() const {
     glUseProgram(m_shaders.at("planet").handle);
 
-    // Render manually animated planet
-    /*glm::fmat4 model_matrix = glm::rotate(glm::fmat4{}, float(glfwGetTime()), glm::fvec3{0.0f, 1.0f, 0.0f});
-    model_matrix = glm::translate(model_matrix, glm::fvec3{ 0.0f, 0.0f, -1.0f });
-    glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ModelMatrix"),
-        1, GL_FALSE, glm::value_ptr(model_matrix));
-
-    glm::fmat4 normal_matrix = glm::inverseTranspose(glm::inverse(m_view_transform) * model_matrix);
-    glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("NormalMatrix"),
-        1, GL_FALSE, glm::value_ptr(normal_matrix));
-
-    glBindVertexArray(planet_object.vertex_AO);
-    glDrawElements(planet_object.draw_mode, planet_object.num_elements, model::INDEX.type, NULL);
-    */
-    
     renderNode(scenegraph_.getRoot(), glm::mat4(1.0f)); // Render with identity parent transform
     
 }
@@ -162,10 +148,25 @@ void ApplicationSolar::render() const {
 
 void ApplicationSolar::uploadView() {
   // vertices are transformed in camera space, so camera transform must be inverted
-  glm::fmat4 view_matrix = glm::inverse(m_view_transform);
+  //glm::fmat4 view_matrix = glm::inverse(m_view_transform);
+  // upload matrix to gpu
+  //glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ViewMatrix"),
+  //                   1, GL_FALSE, glm::value_ptr(view_matrix));
+    Node* camera = scenegraph_.getRoot()->getChildren("Camera");
+  if (!camera) { // Safety check
+      // Handle error: camera node not initialized
+      // For now, use a default view if m_cameraNode_ is null
+      glm::fmat4 default_view_matrix = glm::lookAt(glm::vec3(0, 0, 20), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+      glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ViewMatrix"),
+          1, GL_FALSE, glm::value_ptr(default_view_matrix));
+      return;
+  }
+  // The view matrix is the inverse of the camera's world transform
+  glm::fmat4 view_matrix = glm::inverse(camera->getWorldTransform());
+
   // upload matrix to gpu
   glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ViewMatrix"),
-                     1, GL_FALSE, glm::value_ptr(view_matrix));
+      1, GL_FALSE, glm::value_ptr(view_matrix));
 }
 
 void ApplicationSolar::uploadProjection() {
@@ -252,59 +253,85 @@ void ApplicationSolar::initializeGeometry() {
 // handle key input
 //the steps are much faster with many frames than a low framerate
 void ApplicationSolar::keyCallback(int key, int action, int mods) {
-  if (key == GLFW_KEY_W  && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
-    m_view_transform = glm::translate(m_view_transform, glm::fvec3{0.0f, 0.0f, -0.1f});
-    uploadView();
-  }
-  else if (key == GLFW_KEY_S  && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
-    m_view_transform = glm::translate(m_view_transform, glm::fvec3{0.0f, 0.0f, 0.1f});
-    uploadView();
-  }
-  // The other four are only copy and paste and a different key and a different row of the Matrix
-  else if (key == GLFW_KEY_A && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
-      m_view_transform = glm::translate(m_view_transform, glm::fvec3{ -0.1f, 0.0f, 0.0f });
-      uploadView();
-  }
-  else if (key == GLFW_KEY_D && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
-      m_view_transform = glm::translate(m_view_transform, glm::fvec3{ 0.1f, 0.0f, 0.0f });
-      uploadView();
-  }
-  else if (key == GLFW_KEY_Y && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
-      m_view_transform = glm::translate(m_view_transform, glm::fvec3{ 0.0f, 0.1f, 0.0f });
-      uploadView();
-  }
-  else if (key == GLFW_KEY_X && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
-      m_view_transform = glm::translate(m_view_transform, glm::fvec3{ 0.0f, -0.1f, 0.0f });
-      uploadView();
-  }
+    Node* m_cameraNode_ = scenegraph_.getRoot()->getChildren("Camera");
+    if (!m_cameraNode_) return; // Don't do anything if camera isn't set
+
+    glm::mat4 current_cam_local_transform = m_cameraNode_->getLocalTransform();
+    glm::vec3 translation_vector{ 0.0f };
+    float move_speed = 0.5f; // Adjust as needed
+
+    // Movement relative to world axes (as per original m_view_transform logic)
+    // If you want movement relative to camera's orientation, logic would be different
+    if (key == GLFW_KEY_W && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+        // Move camera forward along its local Z-axis (standard FPS)
+        // Get camera's forward vector (negative Z-axis of its transform)
+        glm::vec3 forward = -glm::vec3(m_cameraNode_->getWorldTransform()[2]);
+        current_cam_local_transform = glm::translate(current_cam_local_transform, glm::normalize(forward) * move_speed);
+    }
+    else if (key == GLFW_KEY_S && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+        // Move camera backward along its local Z-axis
+        glm::vec3 forward = -glm::vec3(m_cameraNode_->getWorldTransform()[2]);
+        current_cam_local_transform = glm::translate(current_cam_local_transform, -glm::normalize(forward) * move_speed);
+    }
+    else if (key == GLFW_KEY_A && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+        // Strafe camera left along its local X-axis
+        glm::vec3 right = glm::vec3(m_cameraNode_->getWorldTransform()[0]);
+        current_cam_local_transform = glm::translate(current_cam_local_transform, -glm::normalize(right) * move_speed);
+    }
+    else if (key == GLFW_KEY_D && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+        // Strafe camera right along its local X-axis
+        glm::vec3 right = glm::vec3(m_cameraNode_->getWorldTransform()[0]);
+        current_cam_local_transform = glm::translate(current_cam_local_transform, glm::normalize(right) * move_speed);
+    }
+    else if (key == GLFW_KEY_SPACE && (action == GLFW_PRESS || action == GLFW_REPEAT)) { // Using Space for Up
+        // Move camera up along world Y-axis (or camera's local Y if preferred)
+        glm::vec3 world_up = glm::vec3(0.0f, 1.0f, 0.0f);
+        current_cam_local_transform = glm::translate(current_cam_local_transform, world_up * move_speed);
+    }
+    else if (key == GLFW_KEY_LEFT_CONTROL && (action == GLFW_PRESS || action == GLFW_REPEAT)) { // Using Left Ctrl for Down
+        // Move camera down along world Y-axis
+        glm::vec3 world_up = glm::vec3(0.0f, 1.0f, 0.0f);
+        current_cam_local_transform = glm::translate(current_cam_local_transform, -world_up * move_speed);
+    }
+
+    m_cameraNode_->setLocalTransform(current_cam_local_transform);
+    uploadView(); // Update the view matrix in the shader
 }
 
 //handle delta mouse movement input
 //it rotates quite extreme. So therefore if the spehre is not visible anymore it is a good idea to 
 void ApplicationSolar::mouseCallback(double pos_x, double pos_y) {
+    Node* m_cameraNode_ = scenegraph_.getRoot()->getChildren("Camera");
+    if (!m_cameraNode_) return; // Don't do anything if camera isn't set
 
     if (firstMouse_) {
         lastMouseX_ = pos_x;
         lastMouseY_ = pos_y;
         firstMouse_ = false;
     }
-    //calculating of the difference of the mouse 
-    float deltax = pos_x - lastMouseX_;
-    float deltay = lastMouseY_ - pos_y;
+
+    float xoffset = pos_x - lastMouseX_;
+    float yoffset = lastMouseY_ - pos_y; // Reversed since y-coordinates go from bottom to top
     lastMouseX_ = pos_x;
     lastMouseY_ = pos_y;
-    //sensitivity otherwise the rotation is to much
-    const float sensitivity = 0.01f;
-    deltax *= sensitivity;
-    deltay *= sensitivity;
 
-    glm::vec3 right = glm::vec3(m_view_transform[0]);
-    glm::vec3 up = glm::vec3(m_view_transform[1]);
+    const float sensitivity = 0.1f; // Adjust sensitivity
+    xoffset *= sensitivity;
+    yoffset *= sensitivity;
 
-    m_view_transform = glm::rotate(m_view_transform, glm::radians(deltax), up);
-    m_view_transform = glm::rotate(m_view_transform, glm::radians(deltay), right);
+    glm::mat4 cam_transform = m_cameraNode_->getLocalTransform();
 
-    uploadView();
+    // Yaw: Rotation around the world's Y-axis (or camera's parent's Y-axis)
+    // This provides a stable yaw that doesn't depend on camera's roll.
+    cam_transform = glm::rotate(glm::mat4(1.0f), glm::radians(xoffset), glm::vec3(0.0f, 1.0f, 0.0f)) * cam_transform;
+
+    // Pitch: Rotation around the camera's local X-axis
+    // Get the camera's current right vector from the (potentially yawed) transform
+    glm::vec3 cam_local_right = glm::normalize(glm::vec3(cam_transform[0]));
+    cam_transform = glm::rotate(glm::mat4(1.0f), glm::radians(yoffset), cam_local_right) * cam_transform;
+
+    m_cameraNode_->setLocalTransform(cam_transform);
+    uploadView(); // Update the view matrix in the shader
 }
 
 
