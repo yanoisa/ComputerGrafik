@@ -1,6 +1,6 @@
 #include "SceneGraph.h"
 #include "Node.h"
-
+SceneGraph::SceneGraph():name_("root"), root_(nullptr) {};
 SceneGraph::SceneGraph(const std::string& name) :name_(name), root_(nullptr) {}
 SceneGraph::SceneGraph(const std::string& name, Node* root) : name_(name), root_(root){}
 std::string SceneGraph::getName() {

@@ -1,15 +1,12 @@
 #include "GeometryNode.h"
-
-// Konstruktor-Implementierung
+//I am not quite sure if this is correct because the secenegraph is not functioning
 GeometryNode::GeometryNode(const std::string& name, Node* parent)
-    : Node(name, parent), geometry_(nullptr) {}
+    : Node(name, parent), geometry_(nullptr){}
 
-// Setzt das zugehörige Modell
-void GeometryNode::setGeometry(model_object* geometry) {
+void GeometryNode::setGeometry(model const* geometry) {
     geometry_ = geometry;
 }
 
-// Gibt das Modell zurück
-model const* getmodel() const{
+model const* GeometryNode::getGeometry() const {
     return geometry_;
 }

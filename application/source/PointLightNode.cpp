@@ -1,4 +1,4 @@
-#include "PointLightNode.hpp"
+#include "PointLightNode.h"
 
 PointLightNode::PointLightNode(const std::string& name, Node* parent)
     : Node(name, parent), lightColor_(1.0f, 1.0f, 1.0f), lightIntensity_(1.0f)
