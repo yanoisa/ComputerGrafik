@@ -6,6 +6,7 @@
 class SceneGraph
 {
 public:
+    SceneGraph();
     SceneGraph(const std::string& name);          // Constructor
     SceneGraph(const std::string& name, Node* root);
     std::string getName();

@@ -18,6 +18,11 @@ using namespace gl;
 #include <glm/gtc/type_ptr.hpp>
 
 #include <iostream>
+#include "SceneGraph.h"
+#include "Node.h"
+#include "GeometryNode.h"
+#include "CameraNode.h"
+#include "PointLightNode.h"
 
 ApplicationSolar::ApplicationSolar(std::string const& resource_path)
  :Application{resource_path}
@@ -25,6 +30,32 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
  ,m_view_transform{glm::translate(glm::fmat4{}, glm::fvec3{0.0f, 0.0f, 4.0f})}
  ,m_view_projection{utils::calculate_projection_matrix(initial_aspect_ratio)}
 {
+  SceneGraph solarSystem("Solar System");
+  scenegraph_ = solarSystem;
+  
+  Node* rootNode = new Node();
+  solarSystem.setRoot(rootNode);
+
+  //Camera 
+  CameraNode* camera = new CameraNode("Camera", rootNode, true);
+
+  Node* mercHold = new Node("mercHold", rootNode);
+
+  GeometryNode* mercGeom = new GeometryNode("mercGeom", mercHold);
+  Node* venHold = new Node("venHold", rootNode);
+  GeometryNode* venGeom = new GeometryNode("venGeom", venHold);
+  Node* earthHold = new Node("earthHold", rootNode);
+  GeometryNode* earthGeom = new GeometryNode("earthGeom", earthHold);
+  Node* marsHold = new Node("marsHold", rootNode);
+  GeometryNode* marsGeom = new GeometryNode("marsGeom", marsHold);
+  Node* jupitHold = new Node("jupitHold", rootNode);
+  GeometryNode* jupitGeom = new GeometryNode("jupitGeom", jupitHold);
+  Node* satHold = new Node("satHold", rootNode);
+  GeometryNode* satGeom = new GeometryNode("satGeom", satHold);
+  Node* uranHold = new Node("uranHold", rootNode);
+  GeometryNode* uranGeom = new GeometryNode("uranGeom", uranHold);
+  Node* neptHold = new Node("neptHold", rootNode);
+  GeometryNode* neptGeom = new GeometryNode("neptGeom", neptHold);
   initializeGeometry();
   initializeShaderPrograms();
 }
@@ -159,5 +190,37 @@ void ApplicationSolar::resizeCallback(unsigned width, unsigned height) {
 
 // exe entry point
 int main(int argc, char* argv[]) {
+  //Setup SceneGraph
+  SceneGraph solarSystem("Solar System");
+  Node* rootNode = new Node();
+  solarSystem.setRoot(rootNode);
+
+  //Camera 
+  CameraNode* camera = new CameraNode("Camera", rootNode, true);
+
+  Node* mercHold = new Node("mercHold", rootNode);
+  
+  GeometryNode* mercGeom = new GeometryNode("mercGeom",mercHold);
+  Node* venHold = new Node("venHold", rootNode);
+  GeometryNode* venGeom = new GeometryNode("venGeom", venHold);
+  Node* earthHold = new Node("earthHold", rootNode);
+  GeometryNode* earthGeom = new GeometryNode("earthGeom", earthHold);
+  Node* marsHold = new Node("marsHold", rootNode);
+  GeometryNode* marsGeom = new GeometryNode("marsGeom", marsHold);
+  Node* jupitHold = new Node("jupitHold", rootNode);
+  GeometryNode* jupitGeom = new GeometryNode("jupitGeom", jupitHold);
+  Node* satHold = new Node("satHold", rootNode);
+  GeometryNode* satGeom = new GeometryNode("satGeom", satHold);
+  Node* uranHold = new Node("uranHold", rootNode);
+  GeometryNode* uranGeom = new GeometryNode("uranGeom", uranHold);
+  Node* neptHold = new Node("neptHold", rootNode);
+  GeometryNode* neptGeom = new GeometryNode("neptGeom", neptHold);
+  
+  const std::list<Node*>& temp = rootNode->getChildrenList();
+  for (Node* node : temp)
+  {
+      std::cout << node->getName() << "\n";
+  }
+
   Application::run<ApplicationSolar>(argc, argv, 3, 2);
 }

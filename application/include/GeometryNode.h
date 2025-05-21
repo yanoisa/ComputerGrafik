@@ -9,13 +9,13 @@
 class GeometryNode : public Node
 {
 public:
-    GeometryNode(const std::string& name, Node* parent = nullptr, bool isPerspective = true);
+    GeometryNode(const std::string& name, Node* parent);
 
-    void setGeometry(model* geometry);
-    model getGeometry();
+    void setmodel(model const* geometry);
+    model const* getmodel() const;
 
 private:
-    model geometry_;
+    model const* geometry_;
 };
 
 #endif

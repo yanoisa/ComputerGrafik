@@ -4,6 +4,7 @@
 #include "application.hpp"
 #include "model.hpp"
 #include "structs.hpp"
+#include "SceneGraph.h"
 
 // gpu representation of model
 class ApplicationSolar : public Application {
@@ -24,6 +25,7 @@ class ApplicationSolar : public Application {
   void render() const;
 
  protected:
+  SceneGraph scenegraph_;
   void initializeShaderPrograms();
   void initializeGeometry();
   // update uniform values
