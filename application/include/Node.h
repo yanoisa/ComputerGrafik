@@ -16,7 +16,7 @@ public:
     void setParent(Node* parent);
 
     Node* getChildren(const std::string& name);
-    const std::list<Node*>& getChildren() const;
+    const std::list<Node*>& getChildrenList() const;
 
     std::string getName();
     std::string getPath();
@@ -27,7 +27,7 @@ public:
     void setLocalTransform(glm::mat4& localTransform);
     void setWorldTransform(glm::mat4& globalTransform);
 
-    void addChild(Node* child);
+    void addChildren(Node* child);
     Node* removeChild(const std::string& name);
 
 private:

@@ -5,10 +5,10 @@ Node::Node():name_("root"),parent_(nullptr),path_("\root"), depth_(0), localTran
 Node::Node(const std::string& name, Node* parent)
     : name_(name),
     parent_(parent),
-    path_(""),                // could also construct based on parent's path
-    depth_(0),                // could update based on parent depth
-    localTransform_(1.0f),    // identity matrix
-    worldTransform_(1.0f)     // identity matrix
+    path_(""),                
+    depth_(0),                
+    localTransform_(1.0f),    
+    worldTransform_(1.0f)     
 {
     if (parent) {
         parent->addChildren(this);
@@ -31,7 +31,7 @@ void Node::setParent(Node* parent) {
     }
 }
 
-Node* Node::getChildren(std::string& name) {
+Node* Node::getChildren(const std::string& name) {
     for (auto it = children_.begin(); it != children_.end(); ++it) {
         if ((*it)->getName() == name) {
             Node* searchedChild = *it;
@@ -69,7 +69,7 @@ void Node::setWorldTransform(glm::mat4& globalTransform) {
 void Node::addChildren(Node* child) {
     Node::children_.push_back(child);
 }
-Node* Node::removeChildren(std::string& name) {
+Node* Node::removeChild(const std::string& name) {
     for (auto it = children_.begin(); it != children_.end(); ++it) {
         if ((*it)->getName() == name) {
             Node* removedChild = *it;
@@ -78,4 +78,8 @@ Node* Node::removeChildren(std::string& name) {
         }
     }
     return nullptr;
+}
+
+Node::~Node() {
+    // Cleanup if needed (currently nothing to delete)
 }
