@@ -1,4 +1,4 @@
-#version 330 core // GLSL version 3.30 core profile.
+#version 330 core 
 
 layout(location = 0) in vec3 in_position; // Vertex position (model space).
 layout(location = 1) in vec3 in_normal;   // Vertex normal (model space).
