@@ -1,5 +1,5 @@
 #include "CameraNode.h"
-
+//is not yet used in the code
 CameraNode::CameraNode(const std::string& name, Node* parent, bool isPerspective)
     : Node(name, parent), isPerspective_(isPerspective), isEnabled_(true), projectionMatrix_(1.0f)
 {

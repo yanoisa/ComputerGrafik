@@ -196,6 +196,7 @@ void ApplicationSolar::initializeGeometry() {
 
 ///////////////////////////// callback functions for window events ////////////
 // handle key input
+//the steps are much faster with many frames than a low framerate
 void ApplicationSolar::keyCallback(int key, int action, int mods) {
   if (key == GLFW_KEY_W  && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
     m_view_transform = glm::translate(m_view_transform, glm::fvec3{0.0f, 0.0f, -0.1f});
@@ -237,10 +238,10 @@ void ApplicationSolar::mouseCallback(double pos_x, double pos_y) {
     float deltay = lastMouseY_ - pos_y;
     lastMouseX_ = pos_x;
     lastMouseY_ = pos_y;
-    
-    //const float sensitivity = 0.1f;
-    //xoffset *= sensitivity;
-    //yoffset *= sensitivity;
+    //sensitivity otherwise the rotation is to much
+    const float sensitivity = 0.01f;
+    deltax *= sensitivity;
+    deltay *= sensitivity;
 
     glm::vec3 right = glm::vec3(m_view_transform[0]);
     glm::vec3 up = glm::vec3(m_view_transform[1]);
