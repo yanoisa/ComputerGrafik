@@ -41,6 +41,6 @@ private:
     int depth_;
     glm::mat4 localTransform_;
     glm::mat4 worldTransform_;
-    float rotationSpeed_ = 0.1f;
+    float rotationSpeed_ = 0.0f;
 };
 #endif

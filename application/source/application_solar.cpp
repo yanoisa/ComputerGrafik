@@ -42,9 +42,15 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
   model planet_model = model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL);
   //LightSource
   PointLightNode* sunLight = new PointLightNode("SunLight", rootNode);
-  sunLight->setLightColor(glm::vec3(1.0, 1.0, 0.8)); // Yellowish light
+  sunLight->setLightColor(glm::vec3(1.0, 1.0, 0.8)); // Yellow light
   sunLight->setLightIntensity(10.0f);
-  sunLight->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(0.0f, 0.0f, 0.0f)));
+  sunLight->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(0.0f, 3.0f, 0.0f)));
+  Node* sunHold = new Node("sunHold", rootNode);
+
+  GeometryNode* sunGeom = new GeometryNode("SunGeom", sunHold); // Give it a unique name
+  sunGeom->setGeometry(&planet_model);
+  sunGeom->setLocalTransform(glm::scale(glm::mat4(1.0f), glm::vec3(3.0f)));
+  sunGeom->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(0.0f, 0.0f, 0.0f)));
   //Camera 
   CameraNode* camera = new CameraNode("Camera", rootNode, true);
   camera->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(10.0f, 0.0f, 20.0f)));
@@ -61,30 +67,38 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
   Node* earthHold = new Node("earthHold", rootNode);
   GeometryNode* earthGeom = new GeometryNode("earthGeom", earthHold);
   earthHold->setLocalTransform(glm::scale(glm::mat4{ 1.0f }, glm::vec3(1.0f)));
-  earthGeom->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(9.0f, 0.0f, 0.0f)));
+  earthGeom->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(10.0f, 0.0f, 0.0f)));
+  
+
+  // The moon's 'holding' node should be a child of the moonOrbitNode
   Node* moonHold = new Node("moonHold", earthGeom);
+  moonHold->setLocalTransform(glm::mat4(1.0f));
+  moonHold->setRotationSpeed(2.0f);
+  moonHold->setLocalTransform(glm::scale(glm::mat4{ 1.0f }, glm::vec3(0.6f))); // Moon's size relative to Earth
   GeometryNode* moonGeom = new GeometryNode("Moon", moonHold);
+  moonGeom->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(2.0f, 0.0f, 0.0f))); // Moon's distance from Earth
+  
   Node* marsHold = new Node("marsHold", rootNode);
   GeometryNode* marsGeom = new GeometryNode("marsGeom", marsHold);
   marsHold->setLocalTransform(glm::scale(glm::mat4{ 1.0f }, glm::vec3(0.53f)));
-  marsGeom->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(11.0f, 0.0f, 0.0f)));
+  marsGeom->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(13.0f, 0.0f, 0.0f)));
   Node* jupitHold = new Node("jupitHold", rootNode);
   GeometryNode* jupitGeom = new GeometryNode("jupitGeom", jupitHold);
   jupitHold->setLocalTransform(glm::scale(glm::mat4{ 1.0f }, glm::vec3(11.0f)));
-  jupitGeom->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(13.0f, 0.0f, 0.0f)));
+  jupitGeom->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(15.0f, 0.0f, 0.0f)));
   Node* satHold = new Node("satHold", rootNode);
   GeometryNode* satGeom = new GeometryNode("satGeom", satHold);
   satHold->setLocalTransform(glm::scale(glm::mat4{ 1.0f }, glm::vec3(9.1f)));
-  satGeom->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(15.0f, 0.0f, 0.0f)));
+  satGeom->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(17.0f, 0.0f, 0.0f)));
   Node* uranHold = new Node("uranHold", rootNode);
   GeometryNode* uranGeom = new GeometryNode("uranGeom", uranHold);
   uranHold->setLocalTransform(glm::scale(glm::mat4{ 1.0f }, glm::vec3(4.0f)));
-  uranGeom->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(17.0f, 0.0f, 0.0f)));
+  uranGeom->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(19.0f, 0.0f, 0.0f)));
   Node* neptHold = new Node("neptHold", rootNode);
   GeometryNode* neptGeom = new GeometryNode("neptGeom", neptHold);
   neptHold->setLocalTransform(glm::scale(glm::mat4{ 1.0f }, glm::vec3(3.9f)));
-  neptGeom->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(19.0f, 0.0f, 0.0f)));
-
+  neptGeom->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(21.0f, 0.0f, 0.0f)));
+  
 
   mercGeom->setGeometry(&planet_model);
   venGeom->setGeometry(&planet_model);
@@ -95,7 +109,6 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
   uranGeom->setGeometry(&planet_model);
   neptGeom->setGeometry(&planet_model);
   moonGeom->setGeometry(&planet_model);
-
   mercHold->setRotationSpeed(1.0f);
   venHold->setRotationSpeed(0.9f);
   earthHold->setRotationSpeed(0.8f);
@@ -104,6 +117,7 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
   satGeom->setRotationSpeed(0.5);
   uranGeom->setRotationSpeed(0.4);
   neptGeom->setRotationSpeed(0.3);
+  moonHold->setRotationSpeed(5.0);
 
   scenegraph_ = solarSystem;
 
@@ -140,7 +154,6 @@ void ApplicationSolar::render() const {
 
 void ApplicationSolar::render() const {
     glUseProgram(m_shaders.at("planet").handle);
-
     renderNode(scenegraph_.getRoot(), glm::mat4(1.0f)); // Render with identity parent transform
     
 }
@@ -155,7 +168,7 @@ void ApplicationSolar::uploadView() {
     Node* camera = scenegraph_.getRoot()->getChildren("Camera");
   if (!camera) { // Safety check
       // Handle error: camera node not initialized
-      // For now, use a default view if m_cameraNode_ is null
+      // default view if m_cameraNode_ is null
       glm::fmat4 default_view_matrix = glm::lookAt(glm::vec3(0, 0, 20), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
       glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ViewMatrix"),
           1, GL_FALSE, glm::value_ptr(default_view_matrix));
@@ -349,8 +362,8 @@ void ApplicationSolar::renderNode(Node* node, glm::mat4 parent_transform) const 
     float speed = node->getRotationSpeed();
     if (speed != 0.0f) {
         float angle = glfwGetTime() * speed;
-        glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0, 1, 0));
-        local_transform = rotation * local_transform;
+        // Apply rotation to the local_transform
+        local_transform = glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0, 1, 0)) * local_transform;
     }
 
     glm::mat4 current_transform = parent_transform * local_transform;
@@ -373,23 +386,6 @@ void ApplicationSolar::renderNode(Node* node, glm::mat4 parent_transform) const 
         renderNode(child, current_transform);
     }
 }
-
-glm::vec3 ApplicationSolar::getPlanetColor(const std::string& name) const {
-    if (name == "mercGeom") return glm::vec3(0.5f, 0.5f, 0.5f);      // Mercury - gray
-    if (name == "venGeom") return glm::vec3(1.0f, 0.8f, 0.5f);      // Venus - yellowish
-    if (name == "earthGeom") return glm::vec3(0.2f, 0.4f, 1.0f);    // Earth - blue
-    if (name == "marsGeom") return glm::vec3(1.0f, 0.3f, 0.2f);     // Mars - reddish
-    if (name == "jupitGeom") return glm::vec3(1.0f, 0.9f, 0.7f);    // Jupiter - beige
-    if (name == "satGeom") return glm::vec3(1.0f, 0.9f, 0.5f);      // Saturn - pale yellow
-    if (name == "uranGeom") return glm::vec3(0.5f, 0.8f, 1.0f);     // Uranus - light blue
-    if (name == "neptGeom") return glm::vec3(0.3f, 0.5f, 1.0f);     // Neptune - blue
-    return glm::vec3(1.0f, 1.0f, 1.0f);                             // default white
-}
-
-
-
-
-
 
 // exe entry point
 int main(int argc, char* argv[]) {
