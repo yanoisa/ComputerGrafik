@@ -46,8 +46,7 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
   sunLight->setLightIntensity(1.0f);
   sunLight->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(0.0f, 0.0f, 0.0f)));
   Node* sunHold = new Node("sunHold", rootNode);
-
-  GeometryNode* sunGeom = new GeometryNode("SunGeom", sunHold); // Give it a unique name
+  GeometryNode* sunGeom = new GeometryNode("SunGeom", sunHold); 
   sunGeom->setGeometry(&planet_model);
   sunGeom->setLocalTransform(glm::scale(glm::mat4(1.0f), glm::vec3(3.0f)));
   sunGeom->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(0.0f, 0.0f, 0.0f)));
@@ -68,15 +67,13 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
   GeometryNode* earthGeom = new GeometryNode("earthGeom", earthHold);
   earthHold->setLocalTransform(glm::scale(glm::mat4{ 1.0f }, glm::vec3(1.0f)));
   earthGeom->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(10.0f, 0.0f, 0.0f)));
-  
-
-  // The moon's 'holding' node should be a child of the moonOrbitNode
+  //moon is relative to 
   Node* moonHold = new Node("moonHold", earthGeom);
   moonHold->setLocalTransform(glm::mat4(1.0f));
   moonHold->setRotationSpeed(2.0f);
-  moonHold->setLocalTransform(glm::scale(glm::mat4{ 1.0f }, glm::vec3(0.6f))); // Moon's size relative to Earth
+  moonHold->setLocalTransform(glm::scale(glm::mat4{ 1.0f }, glm::vec3(0.6f))); 
   GeometryNode* moonGeom = new GeometryNode("Moon", moonHold);
-  moonGeom->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(2.0f, 0.0f, 0.0f))); // Moon's distance from Earth
+  moonGeom->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(2.0f, 0.0f, 0.0f))); 
   
   Node* marsHold = new Node("marsHold", rootNode);
   GeometryNode* marsGeom = new GeometryNode("marsGeom", marsHold);
@@ -132,8 +129,10 @@ ApplicationSolar::~ApplicationSolar() {
 }
 
 void ApplicationSolar::render() const {
+
+    //call recursive render on the graph
     glUseProgram(m_shaders.at("planet").handle);
-    renderNode(scenegraph_.getRoot(), glm::mat4(1.0f)); // Render with identity parent transform
+    renderNode(scenegraph_.getRoot(), glm::mat4(1.0f)); 
     
 }
 
@@ -172,7 +171,7 @@ void ApplicationSolar::uploadUniforms() {
     Node* root = scenegraph_.getRoot();
     PointLightNode* sunLight = dynamic_cast<PointLightNode*>(root->getChildren("SunLight"));
 
-    // Ensure sunLight is valid before dereferencing
+    // Testing
     if (!sunLight) {
         std::cerr << "Error: SunLight node not found!" << std::endl;
         // default lightning
@@ -181,7 +180,7 @@ void ApplicationSolar::uploadUniforms() {
         glUniform1f(glGetUniformLocation(m_shaders.at("planet").handle, "LightIntensity"), 0.0f);
         return;
     }
-
+    //calculating the light parameters from the point Light
     glm::mat4 sunWorldTransform = sunLight->getWorldTransform();
     glm::vec3 light_color = sunLight->getLightColor();
     float light_intensity = sunLight->getLightIntensity();
@@ -215,11 +214,12 @@ void ApplicationSolar::initializeShaderPrograms() {
     m_shaders.at("planet").u_locs["ModelMatrix"] = -1;
     m_shaders.at("planet").u_locs["ViewMatrix"] = -1;
     m_shaders.at("planet").u_locs["ProjectionMatrix"] = -1;
-    m_shaders.at("planet").u_locs["LightPosition"] = -1; // Make sure these are also there
+    // are needed for the light and lightning
+    m_shaders.at("planet").u_locs["LightPosition"] = -1; 
     m_shaders.at("planet").u_locs["LightColor"] = -1;
     m_shaders.at("planet").u_locs["LightIntensity"] = -1;
     m_shaders.at("planet").u_locs["PlanetColor"] = -1;
-    m_shaders.at("planet").u_locs["EmissiveColor"] = -1; // <--- RE-ADD THIS
+    m_shaders.at("planet").u_locs["EmissiveColor"] = -1;
 }
 
 // load models
@@ -265,42 +265,42 @@ void ApplicationSolar::initializeGeometry() {
 //the steps are much faster with many frames than a low framerate
 void ApplicationSolar::keyCallback(int key, int action, int mods) {
     Node* m_cameraNode_ = scenegraph_.getRoot()->getChildren("Camera");
-    if (!m_cameraNode_) return; // Don't do anything if camera isn't set
+    if (!m_cameraNode_) return; 
 
     glm::mat4 current_cam_local_transform = m_cameraNode_->getLocalTransform();
     glm::vec3 translation_vector{ 0.0f };
-    float move_speed = 0.5f; // Adjust as needed
+    float move_speed = 0.5f; // 
 
-    // Movement relative to world axes (as per original m_view_transform logic)
-    // If you want movement relative to camera's orientation, logic would be different
+    // relative to world axes 
+    // w for z-axis
     if (key == GLFW_KEY_W && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
-        // Move camera forward along its local Z-axis (standard FPS)
-        // Get camera's forward vector (negative Z-axis of its transform)
+        
         glm::vec3 forward = -glm::vec3(m_cameraNode_->getWorldTransform()[2]);
         current_cam_local_transform = glm::translate(current_cam_local_transform, glm::normalize(forward) * move_speed);
     }
+    //s for z axis
     else if (key == GLFW_KEY_S && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
-        // Move camera backward along its local Z-axis
         glm::vec3 forward = -glm::vec3(m_cameraNode_->getWorldTransform()[2]);
         current_cam_local_transform = glm::translate(current_cam_local_transform, -glm::normalize(forward) * move_speed);
     }
+    // a for x-axis
     else if (key == GLFW_KEY_A && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
-        // Strafe camera left along its local X-axis
         glm::vec3 right = glm::vec3(m_cameraNode_->getWorldTransform()[0]);
         current_cam_local_transform = glm::translate(current_cam_local_transform, -glm::normalize(right) * move_speed);
     }
+    // d for x-axis
     else if (key == GLFW_KEY_D && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
-        // Strafe camera right along its local X-axis
         glm::vec3 right = glm::vec3(m_cameraNode_->getWorldTransform()[0]);
         current_cam_local_transform = glm::translate(current_cam_local_transform, glm::normalize(right) * move_speed);
-    }
-    else if (key == GLFW_KEY_SPACE && (action == GLFW_PRESS || action == GLFW_REPEAT)) { // Using Space for Up
-        // Move camera up along world Y-axis (or camera's local Y if preferred)
+    }  
+    //space for y-axis
+    else if (key == GLFW_KEY_SPACE && (action == GLFW_PRESS || action == GLFW_REPEAT)) { 
         glm::vec3 world_up = glm::vec3(0.0f, 1.0f, 0.0f);
         current_cam_local_transform = glm::translate(current_cam_local_transform, world_up * move_speed);
-    }
-    else if (key == GLFW_KEY_LEFT_CONTROL && (action == GLFW_PRESS || action == GLFW_REPEAT)) { // Using Left Ctrl for Down
-        // Move camera down along world Y-axis
+    }   
+    //left control for y axis
+    else if (key == GLFW_KEY_LEFT_CONTROL && (action == GLFW_PRESS || action == GLFW_REPEAT)) { 
+        
         glm::vec3 world_up = glm::vec3(0.0f, 1.0f, 0.0f);
         current_cam_local_transform = glm::translate(current_cam_local_transform, -world_up * move_speed);
     }
@@ -313,7 +313,7 @@ void ApplicationSolar::keyCallback(int key, int action, int mods) {
 //it rotates quite extreme. So therefore if the spehre is not visible anymore it is a good idea to 
 void ApplicationSolar::mouseCallback(double pos_x, double pos_y) {
     Node* m_cameraNode_ = scenegraph_.getRoot()->getChildren("Camera");
-    if (!m_cameraNode_) return; // Don't do anything if camera isn't set
+    if (!m_cameraNode_) return; 
 
     if (firstMouse_) {
         lastMouseX_ = pos_x;
@@ -322,22 +322,21 @@ void ApplicationSolar::mouseCallback(double pos_x, double pos_y) {
     }
 
     float xoffset = pos_x - lastMouseX_;
-    float yoffset = lastMouseY_ - pos_y; // Reversed since y-coordinates go from bottom to top
+    float yoffset = lastMouseY_ - pos_y; // reversed since y-coordinates go from bottom to top
     lastMouseX_ = pos_x;
     lastMouseY_ = pos_y;
 
-    const float sensitivity = 0.1f; // Adjust sensitivity
+    const float sensitivity = 0.1f; // adjust sensitivity so movement is easier
     xoffset *= sensitivity;
     yoffset *= sensitivity;
 
     glm::mat4 cam_transform = m_cameraNode_->getLocalTransform();
 
-    // Yaw: Rotation around the world's Y-axis (or camera's parent's Y-axis)
-    // This provides a stable yaw that doesn't depend on camera's roll.
+    //  rotation around the world's Y-axis (or camera's parent's Y-axis)
+    // this provides stability doesn't depend on camera's roll.
     cam_transform = glm::rotate(glm::mat4(1.0f), glm::radians(xoffset), glm::vec3(0.0f, 1.0f, 0.0f)) * cam_transform;
 
-    // Pitch: Rotation around the camera's local X-axis
-    // Get the camera's current right vector from the (potentially yawed) transform
+    // rotation around the camera's local X-axis
     glm::vec3 cam_local_right = glm::normalize(glm::vec3(cam_transform[0]));
     cam_transform = glm::rotate(glm::mat4(1.0f), glm::radians(yoffset), cam_local_right) * cam_transform;
 
@@ -429,13 +428,12 @@ void ApplicationSolar::renderNode(Node* node, glm::mat4 parent_transform) const 
             glUniform3fv(m_shaders.at("planet").u_locs.at("EmissiveColor"), 1, glm::value_ptr(glm::vec3(0.0f, 0.0f, 0.0f))); // No emissive for planets
             glUniform3fv(m_shaders.at("planet").u_locs.at("PlanetColor"), 1, glm::value_ptr(planet_color));
         }
-        // --- END Sun/Planet determination ---
 
         glBindVertexArray(planet_object.vertex_AO);
         glDrawElements(planet_object.draw_mode, planet_object.num_elements, model::INDEX.type, nullptr);
     }
 
-    // Recursively render children
+    // Recursive render children
     for (Node* child : node->getChildrenList()) {
         renderNode(child, current_transform);
     }
