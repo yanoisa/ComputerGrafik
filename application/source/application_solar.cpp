@@ -49,52 +49,49 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
   GeometryNode* sunGeom = new GeometryNode("SunGeom", sunHold); 
   sunGeom->setGeometry(&planet_model);
   sunGeom->setLocalTransform(glm::scale(glm::mat4(1.0f), glm::vec3(3.0f)));
-  sunGeom->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(0.0f, 0.0f, 0.0f)));
   //Camera 
   CameraNode* camera = new CameraNode("Camera", rootNode, true);
-  camera->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(10.0f, 0.0f, 20.0f)));
+  camera->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(0.0f, 0.0f, 60.0f)));
 
   //for the scaling factors was a mixture from actual relationships and what look nice
   Node* mercHold = new Node("mercHold", rootNode);
   GeometryNode* mercGeom = new GeometryNode("mercGeom", mercHold);
-  mercHold->setLocalTransform(glm::scale(glm::mat4{ 1.0f }, glm::vec3(0.38f)));
-  mercGeom->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(5.0f, 0.0f, 0.0f)));
+  mercHold->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(5.0f, 0.0f, 0.0f)));
+  mercGeom->setLocalTransform(glm::scale(glm::mat4{ 1.0f }, glm::vec3(0.38f)));
   Node* venHold = new Node("venHold", rootNode);
   GeometryNode* venGeom = new GeometryNode("venGeom", venHold);
-  venHold->setLocalTransform(glm::scale(glm::mat4{ 1.0f }, glm::vec3(0.95f)));
-  venGeom->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(7.0f, 0.0f, 0.0f)));
+  venHold->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(7.0f, 0.0f, 0.0f)));
+  venGeom->setLocalTransform(glm::scale(glm::mat4{ 1.0f }, glm::vec3(0.95f)));
   Node* earthHold = new Node("earthHold", rootNode);
   GeometryNode* earthGeom = new GeometryNode("earthGeom", earthHold);
-  earthHold->setLocalTransform(glm::scale(glm::mat4{ 1.0f }, glm::vec3(1.0f)));
-  earthGeom->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(10.0f, 0.0f, 0.0f)));
+  earthHold->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(10.0f, 0.0f, 0.0f)));
+  earthGeom->setLocalTransform(glm::scale(glm::mat4{ 1.0f }, glm::vec3(1.0f)));
   //moon is relative to 
   Node* moonHold = new Node("moonHold", earthGeom);
-  moonHold->setLocalTransform(glm::mat4(1.0f));
-  moonHold->setRotationSpeed(2.0f);
-  moonHold->setLocalTransform(glm::scale(glm::mat4{ 1.0f }, glm::vec3(0.6f))); 
+  moonHold->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(3.0f, 0.0f, 0.0f)));
   GeometryNode* moonGeom = new GeometryNode("Moon", moonHold);
-  moonGeom->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(2.0f, 0.0f, 0.0f))); 
+  moonGeom->setLocalTransform(glm::scale(glm::mat4{ 1.0f }, glm::vec3(0.6f)));
   
   Node* marsHold = new Node("marsHold", rootNode);
   GeometryNode* marsGeom = new GeometryNode("marsGeom", marsHold);
-  marsHold->setLocalTransform(glm::scale(glm::mat4{ 1.0f }, glm::vec3(0.53f)));
-  marsGeom->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(13.0f, 0.0f, 0.0f)));
+  marsHold->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(15.0f, 0.0f, 0.0f)));
+  marsGeom->setLocalTransform(glm::scale(glm::mat4{ 1.0f }, glm::vec3(0.5f)));
   Node* jupitHold = new Node("jupitHold", rootNode);
   GeometryNode* jupitGeom = new GeometryNode("jupitGeom", jupitHold);
-  jupitHold->setLocalTransform(glm::scale(glm::mat4{ 1.0f }, glm::vec3(11.0f)));
-  jupitGeom->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(15.0f, 0.0f, 0.0f)));
+  jupitHold->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(20.0f, 0.0f, 0.0f)));
+  jupitGeom->setLocalTransform(glm::scale(glm::mat4{ 1.0f }, glm::vec3(3.0f)));
   Node* satHold = new Node("satHold", rootNode);
   GeometryNode* satGeom = new GeometryNode("satGeom", satHold);
-  satHold->setLocalTransform(glm::scale(glm::mat4{ 1.0f }, glm::vec3(9.1f)));
-  satGeom->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(17.0f, 0.0f, 0.0f)));
+  satHold->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(30.0f, 0.0f, 0.0f)));
+  satGeom->setLocalTransform(glm::scale(glm::mat4{ 1.0f }, glm::vec3(2.5f)));
   Node* uranHold = new Node("uranHold", rootNode);
   GeometryNode* uranGeom = new GeometryNode("uranGeom", uranHold);
-  uranHold->setLocalTransform(glm::scale(glm::mat4{ 1.0f }, glm::vec3(4.0f)));
-  uranGeom->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(19.0f, 0.0f, 0.0f)));
+  uranHold->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(40.0f, 0.0f, 0.0f)));
+  uranGeom->setLocalTransform(glm::scale(glm::mat4{ 1.0f }, glm::vec3(2.0f)));
   Node* neptHold = new Node("neptHold", rootNode);
   GeometryNode* neptGeom = new GeometryNode("neptGeom", neptHold);
-  neptHold->setLocalTransform(glm::scale(glm::mat4{ 1.0f }, glm::vec3(3.9f)));
-  neptGeom->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(21.0f, 0.0f, 0.0f)));
+  neptHold->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(50.0f, 0.0f, 0.0f)));
+  neptGeom->setLocalTransform(glm::scale(glm::mat4{ 1.0f }, glm::vec3(2.0f)));
   
 
   mercGeom->setGeometry(&planet_model);
@@ -111,9 +108,9 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
   earthHold->setRotationSpeed(0.8f);
   marsHold->setRotationSpeed(0.7f);
   jupitHold->setRotationSpeed(0.6);
-  satGeom->setRotationSpeed(0.5);
-  uranGeom->setRotationSpeed(0.4);
-  neptGeom->setRotationSpeed(0.3);
+  satHold->setRotationSpeed(0.5);
+  uranHold->setRotationSpeed(0.4);
+  neptHold->setRotationSpeed(0.3);
   moonHold->setRotationSpeed(5.0);
 
   scenegraph_ = solarSystem;
@@ -306,7 +303,9 @@ void ApplicationSolar::keyCallback(int key, int action, int mods) {
     }
 
     m_cameraNode_->setLocalTransform(current_cam_local_transform);
-    uploadView(); // Update the view matrix in the shader
+    //uploadView(); // Update the view matrix in the shader
+    uploadUniforms(); // updates view, projection, and light positions correctly
+
 }
 
 //handle delta mouse movement input
@@ -341,7 +340,9 @@ void ApplicationSolar::mouseCallback(double pos_x, double pos_y) {
     cam_transform = glm::rotate(glm::mat4(1.0f), glm::radians(yoffset), cam_local_right) * cam_transform;
 
     m_cameraNode_->setLocalTransform(cam_transform);
-    uploadView(); // Update the view matrix in the shader
+    //uploadView(); // Update the view matrix in the shader
+    uploadUniforms(); // updates view, projection, and light positions correctly
+
 }
 
 
