@@ -47,6 +47,8 @@ class ApplicationSolar : public Application {
   //They are used for mouse handling
   double lastMouseX_ = 0.0, lastMouseY_ = 0.0;
   bool firstMouse_ = true;
+  float yaw_ = -90.0f;  // Horizontal angle, -90 to face forward in OpenGL
+  float pitch_ = 0.0f;  // Vertical angle
 };
 
 #endif
