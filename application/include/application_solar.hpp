@@ -25,6 +25,7 @@ class ApplicationSolar : public Application {
   void render() const;
   void renderNode(Node* node, glm::mat4 parent_transform) const;
   glm::vec3 getPlanetColor(const std::string& name) const;
+  void renderStars() const;
 
  protected:
   SceneGraph scenegraph_;
@@ -39,6 +40,8 @@ class ApplicationSolar : public Application {
 
   // cpu representation of model
   model_object planet_object;
+  // cpu representation of stars
+  model_object star_object;
   
   // camera transform matrix
   glm::fmat4 m_view_transform;
@@ -49,6 +52,7 @@ class ApplicationSolar : public Application {
   bool firstMouse_ = true;
   float yaw_ = -90.0f;  // Horizontal angle, -90 to face forward in OpenGL
   float pitch_ = 0.0f;  // Vertical angle
+  std::vector<float> points_;
 };
 
 #endif

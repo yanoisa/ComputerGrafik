@@ -7,7 +7,7 @@ uniform vec3 LightPosition; // Light position in camera/eye space
 uniform vec3 LightColor;
 uniform float LightIntensity;
 uniform vec3  PlanetColor;  // Base color for lit objects
-uniform vec3  EmissiveColor; // <--- NEW/REINTRODUCED UNIFORM for glowing objects
+uniform vec3  EmissiveColor; //for glowing objects
 
 out vec4 frag_color;
 
@@ -19,7 +19,7 @@ void main() {
         // Standard lighting calculations for planets
 
         // Ambient light (a small base light that affects everything)
-        vec3 ambient = 0.1 * PlanetColor; // You can adjust the ambient strength
+        vec3 ambient = 0.1 * PlanetColor; // ambient strength
 
         // Light direction (from fragment to light source)
         vec3 light_dir = normalize(LightPosition - frg_position);
@@ -35,7 +35,7 @@ void main() {
         vec3 view_dir = normalize(-frg_position); // Camera is at origin in camera space
         vec3 reflect_dir = reflect(-light_dir, normal);
         float spec = pow(max(dot(view_dir, reflect_dir), 0.0), 32.0); // 32.0 is shininess exponent
-        vec3 specular = spec * LightColor * LightIntensity * 0.5; // Example specular color strength
+        vec3 specular = spec * LightColor * LightIntensity * 0.5; // specular color strength
 
         // Final lit color
         frag_color = vec4(ambient + diffuse + specular, 1.0);
