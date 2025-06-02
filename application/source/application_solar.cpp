@@ -128,8 +128,16 @@ ApplicationSolar::~ApplicationSolar() {
 }
 
 void ApplicationSolar::render() const {
+	glEnable(GL_BLEND); // Ensure blending is on for stars
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE); // Additive blending for starry glow
+
+	glDepthMask(GL_FALSE); //Disable writing to the depth buffer for stars
+	glDepthFunc(GL_LEQUAL);
 	glUseProgram(m_shaders.at("point").handle);
 	renderStars();
+	glDepthMask(GL_TRUE); // enable writing to depth buffer for planets
+	glDisable(GL_BLEND);  //Disable blending for planets
+	glDepthFunc(GL_LESS);
 	//call recursive render on the graph
 	glUseProgram(m_shaders.at("planet").handle);
 	renderNode(scenegraph_.getRoot(), glm::mat4(1.0f));
@@ -138,7 +146,7 @@ void ApplicationSolar::render() const {
 
 void ApplicationSolar::uploadView() {
 	Node* camera = scenegraph_.getRoot()->getChildren("Camera");
-	if (!camera) { 
+	if (!camera) {
 		// default view 
 		glm::fmat4 default_view_matrix = glm::lookAt(glm::vec3(0, 0, 20), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 		glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ViewMatrix"),
@@ -263,22 +271,33 @@ void ApplicationSolar::initializeGeometry() {
 	planet_object.draw_mode = GL_TRIANGLES;
 	// transfer number of indices to model object 
 	planet_object.num_elements = GLsizei(planet_model.indices.size());
-// Initialize Star Object (as Points)
+	// Initialize Star Object (as Points)
 
-// Example star data: {x, y, z, r, g, b}
+	// Example star data: {x, y, z, r, g, b}
 	std::vector<float> star_vertex_data;
-	// Generate 100 random stars
-	for (int i = 0; i < 10000; ++i) {
-		// Random position (-500 to 500)
-		star_vertex_data.push_back((rand() % 10000 - 500) / 10.0f);
-		star_vertex_data.push_back((rand() % 10000 - 500) / 10.0f);
-		star_vertex_data.push_back((rand() % 10000 ) / -10.0f);
+	// Generate 10000 random stars
+		// otherwise the stars could appear between the planets which could be weird
+	for (int i = 0; i < 100000; ++i) {
+		float x, y, z;
 
-		// Random bright color
-		star_vertex_data.push_back(rand());
-		star_vertex_data.push_back(rand());
-		star_vertex_data.push_back(rand());
+		do {
+			x = (rand() % 10000 - 5000) / 10.0f;
+			y = (rand() % 10000 - 5000) / 10.0f;
+			z = (rand() % 10000 - 5000) / 10.0f;
+		} while (fabs(x) + fabs(y) + fabs(z) < 100);
+
+		// Store valid position
+		star_vertex_data.push_back(x);
+		star_vertex_data.push_back(y);
+		star_vertex_data.push_back(z);
+
+		// Random color
+		star_vertex_data.push_back(rand() / (float)RAND_MAX);
+		star_vertex_data.push_back(rand() / (float)RAND_MAX);
+		star_vertex_data.push_back(rand() / (float)RAND_MAX);
+
 	}
+
 
 	// Generate Vertex Array Object for stars
 	glGenVertexArrays(1, &star_object.vertex_AO);
@@ -291,7 +310,6 @@ void ApplicationSolar::initializeGeometry() {
 		star_vertex_data.size() * sizeof(float),
 		star_vertex_data.data(),
 		GL_STATIC_DRAW);
-
 	// Vertex attributes for stars position at location 2, color at location 3)
 	GLsizei star_stride = 6 * sizeof(float); // 3 for position + 3 for color
 
@@ -322,10 +340,6 @@ void ApplicationSolar::initializeGeometry() {
 	//-----------------------------------------------------------------------
 	//  vertex  sets gl_PointSize
 	glEnable(GL_PROGRAM_POINT_SIZE);
-
-
-
-
 
 }
 
@@ -460,7 +474,7 @@ void ApplicationSolar::renderNode(Node* node, glm::mat4 parent_transform) const 
 		glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("NormalMatrix"),
 			1, GL_FALSE, glm::value_ptr(normal_matrix));
 
-		// --- Determine if this is the Sun or a Planet ---
+		// Determine if this is the Sun or a Planet ---
 		if (node->getName() == "SunGeom") {
 			// Sun: set emissive color 
 			glUniform3fv(m_shaders.at("planet").u_locs.at("EmissiveColor"), 1, glm::value_ptr(glm::vec3(1.0f, 0.8f, 0.0f))); // Bright yellow/orange
@@ -516,11 +530,11 @@ void ApplicationSolar::renderNode(Node* node, glm::mat4 parent_transform) const 
 
 void ApplicationSolar::renderStars() const {
 	// Enable blending for stars
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE); 
+	//glEnable(GL_BLEND);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
 	// Disable depth testing for stars (they should always appear behind)
-	glDisable(GL_DEPTH_TEST);
+	//glDisable(GL_DEPTH_TEST);
 
 	glUseProgram(m_shaders.at("point").handle);
 
@@ -558,8 +572,8 @@ void ApplicationSolar::renderStars() const {
 	glBindVertexArray(0);
 
 	// Restore state
-	glEnable(GL_DEPTH_TEST);
-	glDisable(GL_BLEND);
+	//glEnable(GL_DEPTH_TEST);
+	//glDisable(GL_BLEND);
 }
 
 // exe entry point
