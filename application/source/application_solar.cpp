@@ -33,18 +33,10 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
 	, lastMouseX_{ 0.0 }
 	, lastMouseY_{ 0.0 }
 	, firstMouse_{ true }
-	, points_{
-	 0.5f,-0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
-	 -0.5f,-0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
-	0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f
-	}
 {
 	SceneGraph solarSystem("Solar System");
 	scenegraph_ = solarSystem;
-	for (const float& point : points_) {
-		std::cout << point << " ";
-	}
-	std::cout << std::endl;
+	
 
 	Node* rootNode = new Node();
 	rootNode->setLocalTransform(glm::translate(glm::mat4{ 1.0f }, glm::vec3(0.0f, 0.0f, 0.0f)));
@@ -279,12 +271,12 @@ void ApplicationSolar::initializeGeometry() {
 		// otherwise the stars could appear between the planets which could be weird
 	for (int i = 0; i < 100000; ++i) {
 		float x, y, z;
-
+		//adding stars which has a minimal distance
 		do {
 			x = (rand() % 10000 - 5000) / 10.0f;
 			y = (rand() % 10000 - 5000) / 10.0f;
 			z = (rand() % 10000 - 5000) / 10.0f;
-		} while (fabs(x) + fabs(y) + fabs(z) < 100);
+		} while (abs(x) + abs(y) + abs(z) < 100);
 
 		// Store valid position
 		star_vertex_data.push_back(x);
