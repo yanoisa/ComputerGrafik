@@ -387,14 +387,14 @@ void ApplicationSolar::keyCallback(int key, int action, int mods) {
 	m_cameraNode_->setLocalTransform(current_cam_local_transform);
 	//uploadView(); // Update the view matrix in the shader
 	uploadUniforms(); // updates view, projection, and light positions correctly
-
+	//changes the class variable
 	if (key == GLFW_KEY_1 && action == GLFW_PRESS) {
 		cel_shading_active_ = false;
 		std::cout << "Standard shading enabled.\n";
 	}
 	if (key == GLFW_KEY_2 && action == GLFW_PRESS) {
 		cel_shading_active_ = true;
-		std::cout << "Cel-shading enabled.\n";
+		std::cout << "Cel shading enabled.\n";
 	}
 
 }
