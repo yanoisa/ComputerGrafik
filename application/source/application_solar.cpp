@@ -384,6 +384,15 @@ void ApplicationSolar::keyCallback(int key, int action, int mods) {
 	//uploadView(); // Update the view matrix in the shader
 	uploadUniforms(); // updates view, projection, and light positions correctly
 
+	if (key == GLFW_KEY_1 && action == GLFW_PRESS) {
+		cel_shading_active_ = false;
+		std::cout << "Standard shading enabled.\n";
+	}
+	if (key == GLFW_KEY_2 && action == GLFW_PRESS) {
+		cel_shading_active_ = true;
+		std::cout << "Cel-shading enabled.\n";
+	}
+
 }
 
 //handle delta mouse movement input
@@ -542,7 +551,7 @@ void ApplicationSolar::renderStars() const {
 	}
 	else {
 		// Fallback if camera node isn't found (or use m_view_transform directly)
-		view_matrix = glm::lookAt(glm::vec3(0, 0, 70), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0)); // Default if no camera
+		view_matrix = glm::lookAt(glm::vec3(0, 0, 20), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0)); // Default if no camera
 		if (camera_node) {
 			view_matrix = glm::inverse(camera_node->getWorldTransform());
 		}
