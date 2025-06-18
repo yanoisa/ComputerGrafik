@@ -160,49 +160,40 @@ void ApplicationSolar::uploadProjection() {
 }
 
 // update uniform locations
+// In ApplicationSolar.cpp
+
 void ApplicationSolar::uploadUniforms() {
-	glUseProgram(m_shaders.at("planet").handle);
+	// upload the light data to both shaders,
+	// so both are ready to be used in renderNode.
 
-	uploadView();
-	uploadProjection();
-
+	// Calculate light properties once
 	Node* root = scenegraph_.getRoot();
 	PointLightNode* sunLight = dynamic_cast<PointLightNode*>(root->getChildren("SunLight"));
 
-	// Testing
-	if (!sunLight) {
-		std::cerr << "Error: SunLight node not found!" << std::endl;
-		// default lightning
-		glUniform3fv(glGetUniformLocation(m_shaders.at("planet").handle, "LightPosition"), 1, glm::value_ptr(glm::vec3(0.0f)));
-		glUniform3fv(glGetUniformLocation(m_shaders.at("planet").handle, "LightColor"), 1, glm::value_ptr(glm::vec3(0.0f)));
-		glUniform1f(glGetUniformLocation(m_shaders.at("planet").handle, "LightIntensity"), 0.0f);
-		return;
-	}
-	//calculating the light parameters from the point Light
-	glm::mat4 sunWorldTransform = sunLight->getWorldTransform();
 	glm::vec3 light_color = sunLight->getLightColor();
 	float light_intensity = sunLight->getLightIntensity();
-	glm::vec3 light_position_world = glm::vec3(sunWorldTransform[3]);
+	glm::vec3 light_position_world = glm::vec3(sunLight->getWorldTransform()[3]);
 
 	Node* camera_node = scenegraph_.getRoot()->getChildren("Camera");
-	// Ensure camera_node is valid before dereferencing
-	if (!camera_node) {
-		std::cerr << "Error: Camera node not found!" << std::endl;
-		// Use a default view matrix if camera is not found
-		glm::mat4 default_view_matrix = glm::lookAt(glm::vec3(0, 0, 20), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-		glm::vec3 light_position_view_space = glm::vec3(default_view_matrix * glm::vec4(light_position_world, 1.0f));
-		glUniform3fv(glGetUniformLocation(m_shaders.at("planet").handle, "LightPosition"), 1, glm::value_ptr(light_position_view_space));
-	}
-	else {
-		glm::mat4 view_matrix = glm::inverse(camera_node->getWorldTransform());
-		glm::vec3 light_position_view_space = glm::vec3(view_matrix * glm::vec4(light_position_world, 1.0f));
-		glUniform3fv(glGetUniformLocation(m_shaders.at("planet").handle, "LightPosition"), 1, glm::value_ptr(light_position_view_space));
-	}
 
+	glm::mat4 view_matrix = glm::inverse(camera_node->getWorldTransform());
+	glm::vec3 light_position_view_space = glm::vec3(view_matrix * glm::vec4(light_position_world, 1.0f));
+
+	// Upload to "planet" shader
+	glUseProgram(m_shaders.at("planet").handle);
+	glUniform3fv(glGetUniformLocation(m_shaders.at("planet").handle, "LightPosition"), 1, glm::value_ptr(light_position_view_space));
 	glUniform3fv(glGetUniformLocation(m_shaders.at("planet").handle, "LightColor"), 1, glm::value_ptr(light_color));
 	glUniform1f(glGetUniformLocation(m_shaders.at("planet").handle, "LightIntensity"), light_intensity);
-}
 
+	//  same lighting data to the "cel" shader
+	glUseProgram(m_shaders.at("cel").handle);
+	glUniform3fv(glGetUniformLocation(m_shaders.at("cel").handle, "LightPosition"), 1, glm::value_ptr(light_position_view_space));
+	glUniform3fv(glGetUniformLocation(m_shaders.at("cel").handle, "LightColor"), 1, glm::value_ptr(light_color));
+	glUniform1f(glGetUniformLocation(m_shaders.at("cel").handle, "LightIntensity"), light_intensity);
+
+	uploadView();
+	uploadProjection();
+}
 ///////////////////////////// intialisation functions /////////////////////////
 // load shader sources
 void ApplicationSolar::initializeShaderPrograms() {
@@ -223,6 +214,19 @@ void ApplicationSolar::initializeShaderPrograms() {
 
 	m_shaders.at("point").u_locs["ModelViewMatrix"] = -1;
 	m_shaders.at("point").u_locs["ProjectionMatrix"] = -1;
+
+	m_shaders.emplace("cel", shader_program{ {{GL_VERTEX_SHADER, m_resource_path + "shaders/cel.vert"},
+											  {GL_FRAGMENT_SHADER, m_resource_path + "shaders/cel.frag"}} });
+	// Initialize all uniform locations for the cel shader
+	m_shaders.at("cel").u_locs["NormalMatrix"] = -1;
+	m_shaders.at("cel").u_locs["ModelMatrix"] = -1;
+	m_shaders.at("cel").u_locs["ViewMatrix"] = -1;
+	m_shaders.at("cel").u_locs["ProjectionMatrix"] = -1;
+	m_shaders.at("cel").u_locs["LightPosition"] = -1;
+	m_shaders.at("cel").u_locs["LightColor"] = -1;
+	m_shaders.at("cel").u_locs["LightIntensity"] = -1;
+	m_shaders.at("cel").u_locs["PlanetColor"] = -1;
+	m_shaders.at("cel").u_locs["EmissiveColor"] = -1;
 
 
 }
@@ -441,6 +445,8 @@ void ApplicationSolar::resizeCallback(unsigned width, unsigned height) {
 	uploadProjection();
 }
 
+// In ApplicationSolar.cpp
+
 void ApplicationSolar::renderNode(Node* node, glm::mat4 parent_transform) const {
 	glm::mat4 local_transform = node->getLocalTransform();
 
@@ -448,7 +454,6 @@ void ApplicationSolar::renderNode(Node* node, glm::mat4 parent_transform) const 
 	float speed = node->getRotationSpeed();
 	if (speed != 0.0f) {
 		float angle = glfwGetTime() * speed;
-		// Planet resolves around Y axis
 		local_transform = glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0, 1, 0)) * local_transform;
 	}
 
@@ -456,79 +461,60 @@ void ApplicationSolar::renderNode(Node* node, glm::mat4 parent_transform) const 
 	node->setWorldTransform(current_transform);
 
 	if (auto geo_node = dynamic_cast<GeometryNode*>(node)) {
-		glUseProgram(m_shaders.at("planet").handle);
 
-		glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ModelMatrix"),
-			1, GL_FALSE, glm::value_ptr(current_transform));
+		// selecting shader program based on the attribute
+		const shader_program& current_shader = cel_shading_active_ ? m_shaders.at("cel") : m_shaders.at("planet");
+		glUseProgram(current_shader.handle);
 
-		// Calculate NormalMatrix from ModelView matrix
+		// upload matrices and other uniforms to the currently active shader
+		glUniformMatrix4fv(current_shader.u_locs.at("ModelMatrix"), 1, GL_FALSE, glm::value_ptr(current_transform));
+
 		Node* camera_node = scenegraph_.getRoot()->getChildren("Camera");
-		glm::mat4 model_view_matrix;
-		if (camera_node) {
-			model_view_matrix = glm::inverse(camera_node->getWorldTransform()) * current_transform;
-		}
-		else {
-			//  if camera not found 
-			model_view_matrix = glm::mat4(1.0f) * current_transform;
-		}
+		glm::mat4 view_matrix = camera_node ? glm::inverse(camera_node->getWorldTransform()) : m_view_transform;
+		glm::mat4 model_view_matrix = view_matrix * current_transform;
 		glm::mat4 normal_matrix = glm::inverseTranspose(model_view_matrix);
-		glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("NormalMatrix"),
-			1, GL_FALSE, glm::value_ptr(normal_matrix));
 
-		// Determine if this is the Sun or a Planet ---
+		// These are needed by both shaders for their calculations
+		glUniformMatrix4fv(current_shader.u_locs.at("ViewMatrix"), 1, GL_FALSE, glm::value_ptr(view_matrix));
+		glUniformMatrix4fv(current_shader.u_locs.at("NormalMatrix"), 1, GL_FALSE, glm::value_ptr(normal_matrix));
+		glUniformMatrix4fv(current_shader.u_locs.at("ProjectionMatrix"), 1, GL_FALSE, glm::value_ptr(m_view_projection));
+
+
+		// color properties 
+		glm::vec3 emissive_color(0.0f);
+		glm::vec3 planet_color(1.0f);
+
 		if (node->getName() == "SunGeom") {
-			// Sun: set emissive color 
-			glUniform3fv(m_shaders.at("planet").u_locs.at("EmissiveColor"), 1, glm::value_ptr(glm::vec3(1.0f, 0.8f, 0.0f))); // Bright yellow/orange
-			glUniform3fv(m_shaders.at("planet").u_locs.at("PlanetColor"), 1, glm::value_ptr(glm::vec3(0.0f, 0.0f, 0.0f))); // No base color for lighting
+			emissive_color = glm::vec3(1.0f, 0.8f, 0.0f);
 		}
 		else {
-			// no self-illumination
-			glm::vec3 planet_color = glm::vec3(1.0f); // Default to white
+			// setting the color for each planet
+			if (node->getName() == "mercGeom") planet_color = glm::vec3(0.6f, 0.6f, 0.6f);     // Dark gray
+			else if (node->getName() == "venGeom") planet_color = glm::vec3(0.9f, 0.6f, 0.2f);   // Golden amber
+			else if (node->getName() == "earthGeom") planet_color = glm::vec3(0.2f, 0.4f, 0.9f); // Deep blue
+			else if (node->getName() == "Moon") planet_color = glm::vec3(0.8f, 0.8f, 0.8f);      // Light gray-white
+			else if (node->getName() == "marsGeom") planet_color = glm::vec3(0.9f, 0.3f, 0.1f);  // Reddish orange
+			else if (node->getName() == "jupitGeom") planet_color = glm::vec3(0.9f, 0.7f, 0.4f); // Tawny beige
+			else if (node->getName() == "satGeom") planet_color = glm::vec3(0.8f, 0.7f, 0.3f);   // Buttery yellow
+			else if (node->getName() == "uranGeom") planet_color = glm::vec3(0.3f, 0.9f, 0.9f);  // Bright cyan
+			else if (node->getName() == "neptGeom") planet_color = glm::vec3(0.2f, 0.4f, 1.0f);  // Vivid azure
 
-			if (node->getName() == "mercGeom") {
-				planet_color = glm::vec3(0.7f, 0.7f, 0.7f); // Grey
-			}
-			else if (node->getName() == "venGeom") {
-				planet_color = glm::vec3(0.8f, 0.7f, 0.5f); // Dull yellow/orange
-			}
-			else if (node->getName() == "earthGeom") {
-				planet_color = glm::vec3(0.2f, 0.3f, 0.8f); // Blue/Green
-			}
-			else if (node->getName() == "Moon") {
-				planet_color = glm::vec3(0.7f, 0.7f, 0.7f); // Light grey
-			}
-			else if (node->getName() == "marsGeom") {
-				planet_color = glm::vec3(0.8f, 0.4f, 0.2f); // Reddish-brown
-			}
-			else if (node->getName() == "jupitGeom") {
-				planet_color = glm::vec3(0.7f, 0.6f, 0.4f); // Striped brown/orange (basic color)
-			}
-			else if (node->getName() == "satGeom") {
-				planet_color = glm::vec3(0.8f, 0.7f, 0.5f); // Pale yellow
-			}
-			else if (node->getName() == "uranGeom") {
-				planet_color = glm::vec3(0.6f, 0.8f, 0.9f); // Cyan
-			}
-			else if (node->getName() == "neptGeom") {
-				planet_color = glm::vec3(0.3f, 0.5f, 0.9f); // Blue
-
-			}
-			glUniform3fv(m_shaders.at("planet").u_locs.at("EmissiveColor"), 1, glm::value_ptr(glm::vec3(0.0f, 0.0f, 0.0f))); // No emissive for planets
-			glUniform3fv(m_shaders.at("planet").u_locs.at("PlanetColor"), 1, glm::value_ptr(planet_color));
 		}
 
+		// Upload the color properties to the active shader
+		glUniform3fv(current_shader.u_locs.at("EmissiveColor"), 1, glm::value_ptr(emissive_color));
+		glUniform3fv(current_shader.u_locs.at("PlanetColor"), 1, glm::value_ptr(planet_color));
+
+		//draw the objects
 		glBindVertexArray(planet_object.vertex_AO);
 		glDrawElements(planet_object.draw_mode, planet_object.num_elements, model::INDEX.type, nullptr);
 	}
-
-
 
 	// Recursive render children
 	for (Node* child : node->getChildrenList()) {
 		renderNode(child, current_transform);
 	}
 }
-
 void ApplicationSolar::renderStars() const {
 	// Enable blending for stars
 	//glEnable(GL_BLEND);
