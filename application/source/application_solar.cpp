@@ -147,7 +147,7 @@ void ApplicationSolar::uploadView() {
     if (!camera) {
         // default view
         glm::fmat4 default_view_matrix = glm::lookAt(glm::vec3(0, 0, 20), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-        glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ViewMatrix"),
+        gl::glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ViewMatrix"),
             1, GL_FALSE, glm::value_ptr(default_view_matrix));
         return;
     }
@@ -155,13 +155,13 @@ void ApplicationSolar::uploadView() {
     glm::fmat4 view_matrix = glm::inverse(camera->getWorldTransform());
 
     // upload matrix to gpu
-    glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ViewMatrix"),
+    gl::glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ViewMatrix"),
         1, GL_FALSE, glm::value_ptr(view_matrix));
 }
 
 void ApplicationSolar::uploadProjection() {
     // upload matrix to gpu
-    glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ProjectionMatrix"),
+    gl::glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ProjectionMatrix"),
         1, GL_FALSE, glm::value_ptr(m_view_projection));
 }
 
@@ -215,7 +215,6 @@ void ApplicationSolar::initializeShaderPrograms() {
     m_shaders.at("planet").u_locs["LightIntensity"] = -1;
     m_shaders.at("planet").u_locs["PlanetColor"] = -1;
     m_shaders.at("planet").u_locs["EmissiveColor"] = -1;
-    // *** NEW: Texture uniforms for "planet" shader ***
     m_shaders.at("planet").u_locs["PlanetTexture"] = -1;
     m_shaders.at("planet").u_locs["HasTexture"] = -1;
 
@@ -238,7 +237,6 @@ void ApplicationSolar::initializeShaderPrograms() {
     m_shaders.at("cel").u_locs["LightIntensity"] = -1;
     m_shaders.at("cel").u_locs["PlanetColor"] = -1;
     m_shaders.at("cel").u_locs["EmissiveColor"] = -1;
-    // *** NEW: Texture uniforms for "cel" shader ***
     m_shaders.at("cel").u_locs["PlanetTexture"] = -1;
     m_shaders.at("cel").u_locs["HasTexture"] = -1;
 }
@@ -250,7 +248,7 @@ void ApplicationSolar::initializeGeometry() {
     // generate vertex array object
     glGenVertexArrays(1, &planet_object.vertex_AO);
     // bind the array for attaching buffers
-    glBindVertexArray(planet_object.vertex_AO);
+    gl::glBindVertexArray(planet_object.vertex_AO);
 
     // generate generic buffer
     glGenBuffers(1, &planet_object.vertex_BO);
@@ -314,7 +312,7 @@ void ApplicationSolar::initializeGeometry() {
 
     // Generate Vertex Array Object for stars
     glGenVertexArrays(1, &star_object.vertex_AO);
-    glBindVertexArray(star_object.vertex_AO);
+    gl::glBindVertexArray(star_object.vertex_AO);
 
     // Generate Vertex Buffer Object for stars
     glGenBuffers(1, &star_object.vertex_BO);
@@ -349,7 +347,7 @@ void ApplicationSolar::initializeGeometry() {
 
 
     // Unbind star VAO
-    glBindVertexArray(0);
+    gl::glBindVertexArray(0);
     //-----------------------------------------------------------------------
     //  vertex  sets gl_PointSize
     glEnable(GL_PROGRAM_POINT_SIZE);
@@ -358,43 +356,137 @@ void ApplicationSolar::initializeGeometry() {
 
 void ApplicationSolar::initializeTextures() {
     try {
-        // Load the texture file using loader
+        // Load Earth texture
         pixel_data earth_texture_data = texture_loader::file(m_resource_path + "textures/earth.jpg");
-
-        // Use m_textures map 
         GLuint earth_texture_handle;
         glGenTextures(1, &earth_texture_handle);
         glBindTexture(GL_TEXTURE_2D, earth_texture_handle);
-
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        glTexImage2D(
-            GL_TEXTURE_2D,
-            0,
-            GL_RGBA, // Internal format on the GPU
-            GLsizei(earth_texture_data.width),
-            GLsizei(earth_texture_data.height),
-            0,
-            earth_texture_data.channels,      // Correct name for the format
-            earth_texture_data.channel_type,  // Correct name for the data type
-            earth_texture_data.pixels.data()  // Correct way to get the pointer to the pixel data
-        );
-
-        // Generate mipmaps for the texture
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GLsizei(earth_texture_data.width), GLsizei(earth_texture_data.height), 0, earth_texture_data.channels, earth_texture_data.channel_type, earth_texture_data.pixels.data());
         glGenerateMipmap(GL_TEXTURE_2D);
-
-        // Store the texture handle in the map
         m_textures["earth"] = earth_texture_handle;
-
-        // Unbind texture
         glBindTexture(GL_TEXTURE_2D, 0);
+
+        // mars ---
+        pixel_data mars_texture_data = texture_loader::file(m_resource_path + "textures/mars.jpg"); 
+        GLuint mars_texture_handle;
+        glGenTextures(1, &mars_texture_handle);
+        glBindTexture(GL_TEXTURE_2D, mars_texture_handle);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GLsizei(mars_texture_data.width), GLsizei(mars_texture_data.height), 0, mars_texture_data.channels, mars_texture_data.channel_type, mars_texture_data.pixels.data());
+        glGenerateMipmap(GL_TEXTURE_2D);
+        m_textures["mars"] = mars_texture_handle; 
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        // --- mercury texture ---
+        pixel_data mercury_texture_data = texture_loader::file(m_resource_path + "textures/mercury.jpg");
+        GLuint mercury_texture_handle;
+        glGenTextures(1, &mercury_texture_handle);
+        glBindTexture(GL_TEXTURE_2D, mercury_texture_handle);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GLsizei(mercury_texture_data.width), GLsizei(mercury_texture_data.height), 0, mercury_texture_data.channels, mercury_texture_data.channel_type, mercury_texture_data.pixels.data());
+        glGenerateMipmap(GL_TEXTURE_2D);
+        m_textures["mercury"] = mercury_texture_handle; 
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        // --- venus texture ---
+        pixel_data venus_texture_data = texture_loader::file(m_resource_path + "textures/venus.jpg");
+        GLuint venus_texture_handle;
+        glGenTextures(1, &venus_texture_handle);
+        glBindTexture(GL_TEXTURE_2D, venus_texture_handle);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GLsizei(venus_texture_data.width), GLsizei(venus_texture_data.height), 0, venus_texture_data.channels, venus_texture_data.channel_type, venus_texture_data.pixels.data());
+        glGenerateMipmap(GL_TEXTURE_2D);
+        m_textures["venus"] = venus_texture_handle; 
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        // --- moon texture ---
+        pixel_data moon_texture_data = texture_loader::file(m_resource_path + "textures/moon.jpg");
+        GLuint moon_texture_handle;
+        glGenTextures(1, &moon_texture_handle);
+        glBindTexture(GL_TEXTURE_2D, moon_texture_handle);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GLsizei(moon_texture_data.width), GLsizei(moon_texture_data.height), 0, moon_texture_data.channels, moon_texture_data.channel_type, moon_texture_data.pixels.data());
+        glGenerateMipmap(GL_TEXTURE_2D);
+        m_textures["moon"] = moon_texture_handle;
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+
+        // Jupiter
+        pixel_data jupiter_texture_data = texture_loader::file(m_resource_path + "textures/jupiter.jpg");
+        GLuint jupiter_texture_handle;
+        glGenTextures(1, &jupiter_texture_handle);
+        glBindTexture(GL_TEXTURE_2D, jupiter_texture_handle);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GLsizei(jupiter_texture_data.width), GLsizei(jupiter_texture_data.height), 0, jupiter_texture_data.channels, jupiter_texture_data.channel_type, jupiter_texture_data.pixels.data());
+        glGenerateMipmap(GL_TEXTURE_2D);
+        m_textures["jupiter"] = jupiter_texture_handle;
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        // Saturn 
+        pixel_data saturn_texture_data = texture_loader::file(m_resource_path + "textures/saturn.jpg");
+        GLuint saturn_texture_handle;
+        glGenTextures(1, &saturn_texture_handle);
+        glBindTexture(GL_TEXTURE_2D, saturn_texture_handle);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GLsizei(saturn_texture_data.width), GLsizei(saturn_texture_data.height), 0, saturn_texture_data.channels, saturn_texture_data.channel_type, saturn_texture_data.pixels.data());
+        glGenerateMipmap(GL_TEXTURE_2D);
+        m_textures["saturn"] = saturn_texture_handle;
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        // Uranus
+        pixel_data uranus_texture_data = texture_loader::file(m_resource_path + "textures/uranus.jpg");
+        GLuint uranus_texture_handle;
+        glGenTextures(1, &uranus_texture_handle);
+        glBindTexture(GL_TEXTURE_2D, uranus_texture_handle);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GLsizei(uranus_texture_data.width), GLsizei(uranus_texture_data.height), 0, uranus_texture_data.channels, uranus_texture_data.channel_type, uranus_texture_data.pixels.data());
+        glGenerateMipmap(GL_TEXTURE_2D);
+        m_textures["uranus"] = uranus_texture_handle;
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        // Neptun
+        pixel_data neptun_texture_data = texture_loader::file(m_resource_path + "textures/neptune.jpg");
+        GLuint neptun_texture_handle;
+        glGenTextures(1, &neptun_texture_handle);
+        glBindTexture(GL_TEXTURE_2D, neptun_texture_handle);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GLsizei(neptun_texture_data.width), GLsizei(neptun_texture_data.height), 0, neptun_texture_data.channels, neptun_texture_data.channel_type, neptun_texture_data.pixels.data());
+        glGenerateMipmap(GL_TEXTURE_2D);
+        m_textures["neptun"] = neptun_texture_handle;
+        glBindTexture(GL_TEXTURE_2D, 0);
+
 
     }
     catch (const std::exception& e) {
-        std::cerr << "Failed to load earth texture: " << e.what() << std::endl;
+        std::cerr << "Failed to load a texture: " << e.what() << std::endl;
     }
 }
 
@@ -526,7 +618,7 @@ void ApplicationSolar::renderNode(Node* node, glm::mat4 parent_transform) const 
         glUseProgram(current_shader.handle);
 
         // upload matrices and other uniforms to the currently active shader
-        glUniformMatrix4fv(current_shader.u_locs.at("ModelMatrix"), 1, GL_FALSE, glm::value_ptr(current_transform));
+        gl::glUniformMatrix4fv(current_shader.u_locs.at("ModelMatrix"), 1, GL_FALSE, glm::value_ptr(current_transform));
 
         Node* camera_node = scenegraph_.getRoot()->getChildren("Camera");
         glm::mat4 view_matrix = camera_node ? glm::inverse(camera_node->getWorldTransform()) : m_view_transform;
@@ -534,9 +626,9 @@ void ApplicationSolar::renderNode(Node* node, glm::mat4 parent_transform) const 
         glm::mat4 normal_matrix = glm::inverseTranspose(model_view_matrix);
 
         // These are needed by both shaders for their calculations
-        glUniformMatrix4fv(current_shader.u_locs.at("ViewMatrix"), 1, GL_FALSE, glm::value_ptr(view_matrix));
-        glUniformMatrix4fv(current_shader.u_locs.at("NormalMatrix"), 1, GL_FALSE, glm::value_ptr(normal_matrix));
-        glUniformMatrix4fv(current_shader.u_locs.at("ProjectionMatrix"), 1, GL_FALSE, glm::value_ptr(m_view_projection));
+        gl::glUniformMatrix4fv(current_shader.u_locs.at("ViewMatrix"), 1, GL_FALSE, glm::value_ptr(view_matrix));
+        gl::glUniformMatrix4fv(current_shader.u_locs.at("NormalMatrix"), 1, GL_FALSE, glm::value_ptr(normal_matrix));
+        gl::glUniformMatrix4fv(current_shader.u_locs.at("ProjectionMatrix"), 1, GL_FALSE, glm::value_ptr(m_view_projection));
 
 
         // color properties
@@ -549,18 +641,42 @@ void ApplicationSolar::renderNode(Node* node, glm::mat4 parent_transform) const 
         }
         else {
             // setting the color for each planet
-            if (node->getName() == "mercGeom") planet_color = glm::vec3(0.6f, 0.6f, 0.6f);      // Dark gray
-            else if (node->getName() == "venGeom") planet_color = glm::vec3(0.9f, 0.6f, 0.2f);    // Golden amber
+            if (node->getName() == "mercGeom") { 
+                planet_color = glm::vec3(0.6f, 0.6f, 0.6f); 
+                has_texture = true;
+            }    // Dark gray
+            else if (node->getName() == "venGeom") { 
+                planet_color = glm::vec3(0.9f, 0.6f, 0.2f);    // Golden amber
+                has_texture = true;
+            }
             else if (node->getName() == "earthGeom") {
                 planet_color = glm::vec3(0.2f, 0.4f, 0.9f); // Deep blue 
-                has_texture = true; // 
+                has_texture = true; 
             }
-            else if (node->getName() == "Moon") planet_color = glm::vec3(0.8f, 0.8f, 0.8f);       // Light gray-white
-            else if (node->getName() == "marsGeom") planet_color = glm::vec3(0.9f, 0.3f, 0.1f);  // Reddish orange
-            else if (node->getName() == "jupitGeom") planet_color = glm::vec3(0.9f, 0.7f, 0.4f); // Tawny beige
-            else if (node->getName() == "satGeom") planet_color = glm::vec3(0.8f, 0.7f, 0.3f);    // Buttery yellow
-            else if (node->getName() == "uranGeom") planet_color = glm::vec3(0.3f, 0.9f, 0.9f);  // Bright cyan
-            else if (node->getName() == "neptGeom") planet_color = glm::vec3(0.2f, 0.4f, 1.0f);  // Vivid azure
+            else if (node->getName() == "Moon") {
+                planet_color = glm::vec3(0.8f, 0.8f, 0.8f);       // Light gray-white
+                has_texture = true;
+            }
+            else if (node->getName() == "marsGeom") {
+                planet_color = glm::vec3(0.9f, 0.3f, 0.1f); // Reddish orange
+                has_texture = true;
+            } 
+            else if (node->getName() == "jupitGeom") {
+                planet_color = glm::vec3(0.9f, 0.7f, 0.4f); // Tawny beige
+                has_texture = true;
+            }
+            else if (node->getName() == "satGeom") {
+                planet_color = glm::vec3(0.8f, 0.7f, 0.3f);    // Buttery yellow
+                has_texture = true;
+            }
+            else if (node->getName() == "uranGeom") {
+                planet_color = glm::vec3(0.3f, 0.9f, 0.9f);  // Bright cyan
+                has_texture = true;
+            }
+            else if (node->getName() == "neptGeom") {
+                planet_color = glm::vec3(0.2f, 0.4f, 1.0f);  // Vivid azure
+                has_texture = true;
+            }
 
         }
 
@@ -570,21 +686,53 @@ void ApplicationSolar::renderNode(Node* node, glm::mat4 parent_transform) const 
 
         // Texture binding and uniforms ***
         glUniform1i(current_shader.u_locs.at("HasTexture"), has_texture);
-        if (has_texture && m_textures.count("earth")) {
-            glActiveTexture(GL_TEXTURE0); // Activate texture unit 0
-            glBindTexture(GL_TEXTURE_2D, m_textures.at("earth")); // Bind earth texture to unit 0
-            glUniform1i(current_shader.u_locs.at("PlanetTexture"), 0); // Tell shader that PlanetTexture is in unit 0
+        if (has_texture) {
+            GLuint texture_to_bind = 0; // Default to no texture
+            if (node->getName() == "earthGeom" && m_textures.count("earth")) {
+                texture_to_bind = m_textures.at("earth");
+            }
+            else if (node->getName() == "marsGeom" && m_textures.count("mars")) { // Check for Mars texture
+                texture_to_bind = m_textures.at("mars");
+            }
+            else if (node->getName() == "mercGeom" && m_textures.count("mercury")) { // Check for Mercury texture
+                texture_to_bind = m_textures.at("mercury");
+            }
+            else if (node->getName() == "Moon" && m_textures.count("moon")) { // Check for Moon texture
+                texture_to_bind = m_textures.at("moon");
+            }
+            else if (node->getName() == "venGeom" && m_textures.count("venus")) { // Check for Venus texture
+                texture_to_bind = m_textures.at("venus");
+            }
+            else if (node->getName() == "jupitGeom" && m_textures.count("jupiter")) { // Check for Jupiter texture
+                texture_to_bind = m_textures.at("jupiter");
+            }
+            else if (node->getName() == "satGeom" && m_textures.count("saturn")) { // Check for Saturn texture
+                texture_to_bind = m_textures.at("saturn");
+            }
+            else if (node->getName() == "uranGeom" && m_textures.count("uranus")) { // Check for Uranus texture
+                texture_to_bind = m_textures.at("uranus");
+            }
+            else if (node->getName() == "neptGeom" && m_textures.count("neptun")) { // Check for Neptun texture
+                texture_to_bind = m_textures.at("neptun");
+            }
+
+            if (texture_to_bind != 0) {
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, texture_to_bind);
+                glUniform1i(current_shader.u_locs.at("PlanetTexture"), 0);
+            }
+            else {
+                glBindTexture(GL_TEXTURE_2D, 0); // No valid texture found, unbind
+            }
         }
         else {
-            // Unbind texture if not using one, or bind a default white texture
-            glBindTexture(GL_TEXTURE_2D, 0);
+            glBindTexture(GL_TEXTURE_2D, 0); // No texture intended, unbind
         }
 
         //draw the objects
-        glBindVertexArray(planet_object.vertex_AO);
+        gl::glBindVertexArray(planet_object.vertex_AO);
         glDrawElements(planet_object.draw_mode, planet_object.num_elements, model::INDEX.type, nullptr);
 
-        //  Unbind texture after drawing
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 
@@ -624,17 +772,17 @@ void ApplicationSolar::renderStars() const {
     glm::mat4 model_view_matrix = view_matrix * star_model_matrix;
 
     // Upload uniforms for stars
-    glUniformMatrix4fv(m_shaders.at("point").u_locs.at("ModelViewMatrix"),
+    gl::glUniformMatrix4fv(m_shaders.at("point").u_locs.at("ModelViewMatrix"),
         1, GL_FALSE, glm::value_ptr(model_view_matrix));
-    glUniformMatrix4fv(m_shaders.at("point").u_locs.at("ProjectionMatrix"),
+    gl::glUniformMatrix4fv(m_shaders.at("point").u_locs.at("ProjectionMatrix"),
         1, GL_FALSE, glm::value_ptr(m_view_projection));
 
     // Bind the VAO for stars and draw
-    glBindVertexArray(star_object.vertex_AO);
-    glDrawArrays(star_object.draw_mode, 0, star_object.num_elements);
+    gl::glBindVertexArray(star_object.vertex_AO);
+    gl::glDrawArrays(star_object.draw_mode, 0, star_object.num_elements);
 
     // Unbind VAO
-    glBindVertexArray(0);
+    gl::glBindVertexArray(0);
 
     // Restore state
     //glEnable(GL_DEPTH_TEST);

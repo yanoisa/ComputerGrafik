@@ -11,7 +11,7 @@ uniform mat4 NormalMatrix; 		// Normal transformation to camera space.
 
 out vec3 frg_normal; 	// Interpolated normal for fragment shader (camera space).
 out vec3 frg_position; 	// Interpolated position for fragment shader (camera space).
-out vec2 frg_texcoord;  // *** NEW: Interpolated texture coordinates for fragment shader. ***
+out vec2 frg_texcoord;  // Interpolated texture coordinates for fragment shader.
 
 void main() {
     frg_position = vec3(ViewMatrix * ModelMatrix * vec4(in_position, 1.0)); // Transform position to camera space.
