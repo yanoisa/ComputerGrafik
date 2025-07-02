@@ -8,7 +8,7 @@ uniform vec3 LightPosition; // Light position in camera/eye space
 uniform vec3 LightColor;
 uniform float LightIntensity;
 uniform vec3 PlanetColor;   // Base color for lit objects (will be multiplied with texture)
-uniform vec3 EmissiveColor; //for glowing objects
+uniform vec3 EmissiveColor; // for glowing objects
 
 uniform sampler2D PlanetTexture; // Texture sampler uniform
 uniform bool HasTexture;         // Flag to indicate if texture exists
@@ -34,7 +34,7 @@ void main() {
     vec3 normal = normalize(frg_normal); // Ensure normal is normalized
     vec3 view_dir = normalize(-frg_position); // Direction from fragment to camera (origin in view space)
 
-    // Outline effect (more of a rim/back-facing color in this context)
+    // Outline effect 
     // If the angle between the normal and view_dir is large (surface facing away)
     if (dot(normal, view_dir) < 0.6) {
         frag_color = vec4(PlanetColor, 1.0); // Use a distinct outline color
@@ -51,7 +51,7 @@ void main() {
 
     vec3 diffuse = diff * LightColor * object_color * LightIntensity;
 
-    // Specular component (highlights, reflections) - often simplified or removed in cel shading
+    // Specular component (highlights, reflections)
     vec3 reflect_dir = reflect(-light_dir, normal);
     float spec = pow(max(dot(view_dir, reflect_dir), 0.0), 32.0); // 32.0 is shininess exponent
     vec3 specular = spec * LightColor * LightIntensity * 0.5; // specular color strength

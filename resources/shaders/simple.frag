@@ -16,15 +16,13 @@ uniform bool HasTexture;         // Flag to indicate if texture exists
 out vec4 frag_color;
 
 void main() {
-    // If EmissiveColor is non-zero, this fragment belongs to an emissive object (like the sun)
+    // If EmissiveColor is non-zero, this belongs to the sun
     if (EmissiveColor != vec3(0.0, 0.0, 0.0) && HasTexture) {
         frag_color = vec4(vec3(texture(PlanetTexture, frg_texcoord)), 1.0); // Directly output the emissive color
     } else if (EmissiveColor != vec3(0.0, 0.0, 0.0) && !HasTexture) {
         frag_color = vec4(EmissiveColor, 1.0); // Directly output the emissive color
-    }
-        else{
+    } else {
         // Standard lighting calculations for planets
-
         vec3 object_color = PlanetColor;
         if (HasTexture) {
             object_color = vec3(texture(PlanetTexture, frg_texcoord));

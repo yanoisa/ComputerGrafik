@@ -356,145 +356,146 @@ void ApplicationSolar::initializeGeometry() {
 void ApplicationSolar::initializeTextures() {
     try {
         // Load Earth texture
-        pixel_data earth_texture_data = texture_loader::file(m_resource_path + "textures/earth.jpg");
+        pixel_data earth_texture_data = texture_loader::file(m_resource_path + "textures/earth.jpg"); // Load image data from file
         GLuint earth_texture_handle;
-        glGenTextures(1, &earth_texture_handle);
-        glBindTexture(GL_TEXTURE_2D, earth_texture_handle);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GLsizei(earth_texture_data.width), GLsizei(earth_texture_data.height), 0, earth_texture_data.channels, earth_texture_data.channel_type, earth_texture_data.pixels.data());
-        glGenerateMipmap(GL_TEXTURE_2D);
-        m_textures["earth"] = earth_texture_handle;
-        glBindTexture(GL_TEXTURE_2D, 0);
+        glGenTextures(1, &earth_texture_handle); // Generate unique texture ID
+        glBindTexture(GL_TEXTURE_2D, earth_texture_handle); // Bind texture for setup
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // Repeat texture horizontally
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); // Repeat texture vertically
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); // Smooth minification with mipmaps
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // Smooth magnification
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GLsizei(earth_texture_data.width), GLsizei(earth_texture_data.height), 0, earth_texture_data.channels, earth_texture_data.channel_type, earth_texture_data.pixels.data()); // Upload texture to GPU
+        glGenerateMipmap(GL_TEXTURE_2D); // Generate mipmaps for efficient scaling
+        m_textures["earth"] = earth_texture_handle; // Store handle in map for later use
+        glBindTexture(GL_TEXTURE_2D, 0); // Unbind texture
 
-        // mars ---
-        pixel_data mars_texture_data = texture_loader::file(m_resource_path + "textures/mars.jpg"); 
+
+        // Load Mars texture
+        pixel_data mars_texture_data = texture_loader::file(m_resource_path + "textures/mars.jpg"); // Load image data from file
         GLuint mars_texture_handle;
-        glGenTextures(1, &mars_texture_handle);
-        glBindTexture(GL_TEXTURE_2D, mars_texture_handle);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GLsizei(mars_texture_data.width), GLsizei(mars_texture_data.height), 0, mars_texture_data.channels, mars_texture_data.channel_type, mars_texture_data.pixels.data());
-        glGenerateMipmap(GL_TEXTURE_2D);
-        m_textures["mars"] = mars_texture_handle; 
-        glBindTexture(GL_TEXTURE_2D, 0);
+        glGenTextures(1, &mars_texture_handle); // Generate unique texture ID
+        glBindTexture(GL_TEXTURE_2D, mars_texture_handle); // Bind texture for setup
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // Repeat texture horizontally
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); // Repeat texture vertically
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); // Smooth minification with mipmaps
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // Smooth magnification
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GLsizei(mars_texture_data.width), GLsizei(mars_texture_data.height), 0, mars_texture_data.channels, mars_texture_data.channel_type, mars_texture_data.pixels.data());// Upload texture to GPU
+        glGenerateMipmap(GL_TEXTURE_2D); // Generate mipmaps for efficient scaling
+        m_textures["mars"] = mars_texture_handle; // Store handle in map for later use
+        glBindTexture(GL_TEXTURE_2D, 0); // Unbind texture
 
         // --- mercury texture ---
-        pixel_data mercury_texture_data = texture_loader::file(m_resource_path + "textures/mercury.jpg");
+        pixel_data mercury_texture_data = texture_loader::file(m_resource_path + "textures/mercury.jpg"); // Load image data from file
         GLuint mercury_texture_handle;
-        glGenTextures(1, &mercury_texture_handle);
-        glBindTexture(GL_TEXTURE_2D, mercury_texture_handle);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GLsizei(mercury_texture_data.width), GLsizei(mercury_texture_data.height), 0, mercury_texture_data.channels, mercury_texture_data.channel_type, mercury_texture_data.pixels.data());
-        glGenerateMipmap(GL_TEXTURE_2D);
-        m_textures["mercury"] = mercury_texture_handle; 
-        glBindTexture(GL_TEXTURE_2D, 0);
+        glGenTextures(1, &mercury_texture_handle); // Generate unique texture ID
+        glBindTexture(GL_TEXTURE_2D, mercury_texture_handle); // Bind texture for setup
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // Repeat texture horizontally
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); // Repeat texture vertically
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); // Smooth minification with mipmaps
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // Smooth magnification
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GLsizei(mercury_texture_data.width), GLsizei(mercury_texture_data.height), 0, mercury_texture_data.channels, mercury_texture_data.channel_type, mercury_texture_data.pixels.data()); // Upload texture to GPU
+        glGenerateMipmap(GL_TEXTURE_2D); // Generate mipmaps for efficient scaling
+        m_textures["mercury"] = mercury_texture_handle; // Store handle in map for later use
+        glBindTexture(GL_TEXTURE_2D, 0); // Unbind texture
 
         // --- venus texture ---
-        pixel_data venus_texture_data = texture_loader::file(m_resource_path + "textures/venus.jpg");
+        pixel_data venus_texture_data = texture_loader::file(m_resource_path + "textures/venus.jpg"); // Load image data from file
         GLuint venus_texture_handle;
-        glGenTextures(1, &venus_texture_handle);
-        glBindTexture(GL_TEXTURE_2D, venus_texture_handle);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GLsizei(venus_texture_data.width), GLsizei(venus_texture_data.height), 0, venus_texture_data.channels, venus_texture_data.channel_type, venus_texture_data.pixels.data());
-        glGenerateMipmap(GL_TEXTURE_2D);
-        m_textures["venus"] = venus_texture_handle; 
-        glBindTexture(GL_TEXTURE_2D, 0);
+        glGenTextures(1, &venus_texture_handle); // Generate unique texture ID
+        glBindTexture(GL_TEXTURE_2D, venus_texture_handle); // Bind texture for setup
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // Repeat texture horizontally
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); // Repeat texture vertically
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); // Smooth minification with mipmaps
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // Smooth magnification
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GLsizei(venus_texture_data.width), GLsizei(venus_texture_data.height), 0, venus_texture_data.channels, venus_texture_data.channel_type, venus_texture_data.pixels.data()); // Upload texture to GPU
+        glGenerateMipmap(GL_TEXTURE_2D); // Generate mipmaps for efficient scaling
+        m_textures["venus"] = venus_texture_handle; // Store handle in map for later use
+        glBindTexture(GL_TEXTURE_2D, 0); // Unbind texture
 
         // --- moon texture ---
-        pixel_data moon_texture_data = texture_loader::file(m_resource_path + "textures/moon.jpg");
+        pixel_data moon_texture_data = texture_loader::file(m_resource_path + "textures/moon.jpg"); // Load image data from file
         GLuint moon_texture_handle;
-        glGenTextures(1, &moon_texture_handle);
-        glBindTexture(GL_TEXTURE_2D, moon_texture_handle);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GLsizei(moon_texture_data.width), GLsizei(moon_texture_data.height), 0, moon_texture_data.channels, moon_texture_data.channel_type, moon_texture_data.pixels.data());
-        glGenerateMipmap(GL_TEXTURE_2D);
-        m_textures["moon"] = moon_texture_handle;
-        glBindTexture(GL_TEXTURE_2D, 0);
+        glGenTextures(1, &moon_texture_handle); // Generate unique texture ID
+        glBindTexture(GL_TEXTURE_2D, moon_texture_handle); // Bind texture for setup
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // Repeat texture horizontally
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); // Repeat texture vertically
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); // Smooth minification with mipmaps
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // Smooth magnification
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GLsizei(moon_texture_data.width), GLsizei(moon_texture_data.height), 0, moon_texture_data.channels, moon_texture_data.channel_type, moon_texture_data.pixels.data()); // Upload texture to GPU
+        glGenerateMipmap(GL_TEXTURE_2D); // Generate mipmaps for efficient scaling
+        m_textures["moon"] = moon_texture_handle; // Store handle in map for later use
+        glBindTexture(GL_TEXTURE_2D, 0); // Unbind texture
 
 
         // Jupiter
-        pixel_data jupiter_texture_data = texture_loader::file(m_resource_path + "textures/jupiter.jpg");
+        pixel_data jupiter_texture_data = texture_loader::file(m_resource_path + "textures/jupiter.jpg"); // Load image data from file
         GLuint jupiter_texture_handle;
-        glGenTextures(1, &jupiter_texture_handle);
-        glBindTexture(GL_TEXTURE_2D, jupiter_texture_handle);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GLsizei(jupiter_texture_data.width), GLsizei(jupiter_texture_data.height), 0, jupiter_texture_data.channels, jupiter_texture_data.channel_type, jupiter_texture_data.pixels.data());
-        glGenerateMipmap(GL_TEXTURE_2D);
-        m_textures["jupiter"] = jupiter_texture_handle;
-        glBindTexture(GL_TEXTURE_2D, 0);
+        glGenTextures(1, &jupiter_texture_handle); // Generate unique texture ID
+        glBindTexture(GL_TEXTURE_2D, jupiter_texture_handle); // Bind texture for setup
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // Repeat texture horizontally
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); // Repeat texture vertically
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); // Smooth minification with mipmaps
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // Smooth magnification
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GLsizei(jupiter_texture_data.width), GLsizei(jupiter_texture_data.height), 0, jupiter_texture_data.channels, jupiter_texture_data.channel_type, jupiter_texture_data.pixels.data()); // Upload texture to GPU
+        glGenerateMipmap(GL_TEXTURE_2D); // Generate mipmaps for efficient scaling
+        m_textures["jupiter"] = jupiter_texture_handle; // Store handle in map for later use
+        glBindTexture(GL_TEXTURE_2D, 0); // Unbind texture
 
         // Saturn 
-        pixel_data saturn_texture_data = texture_loader::file(m_resource_path + "textures/saturn.jpg");
+        pixel_data saturn_texture_data = texture_loader::file(m_resource_path + "textures/saturn.jpg"); // Load image data from file
         GLuint saturn_texture_handle;
-        glGenTextures(1, &saturn_texture_handle);
-        glBindTexture(GL_TEXTURE_2D, saturn_texture_handle);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GLsizei(saturn_texture_data.width), GLsizei(saturn_texture_data.height), 0, saturn_texture_data.channels, saturn_texture_data.channel_type, saturn_texture_data.pixels.data());
-        glGenerateMipmap(GL_TEXTURE_2D);
-        m_textures["saturn"] = saturn_texture_handle;
-        glBindTexture(GL_TEXTURE_2D, 0);
+        glGenTextures(1, &saturn_texture_handle); // Generate unique texture ID
+        glBindTexture(GL_TEXTURE_2D, saturn_texture_handle); // Bind texture for setup
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // Repeat texture horizontally
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); // Repeat texture vertically
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); // Smooth minification with mipmaps
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // Smooth magnification
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GLsizei(saturn_texture_data.width), GLsizei(saturn_texture_data.height), 0, saturn_texture_data.channels, saturn_texture_data.channel_type, saturn_texture_data.pixels.data()); // Upload texture to GPU
+        glGenerateMipmap(GL_TEXTURE_2D); // Generate mipmaps for efficient scaling
+        m_textures["saturn"] = saturn_texture_handle; // Store handle in map for later use
+        glBindTexture(GL_TEXTURE_2D, 0); // Unbind texture
 
         // Uranus
-        pixel_data uranus_texture_data = texture_loader::file(m_resource_path + "textures/uranus.jpg");
+        pixel_data uranus_texture_data = texture_loader::file(m_resource_path + "textures/uranus.jpg"); // Load image data from file
         GLuint uranus_texture_handle;
-        glGenTextures(1, &uranus_texture_handle);
-        glBindTexture(GL_TEXTURE_2D, uranus_texture_handle);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GLsizei(uranus_texture_data.width), GLsizei(uranus_texture_data.height), 0, uranus_texture_data.channels, uranus_texture_data.channel_type, uranus_texture_data.pixels.data());
-        glGenerateMipmap(GL_TEXTURE_2D);
-        m_textures["uranus"] = uranus_texture_handle;
-        glBindTexture(GL_TEXTURE_2D, 0);
+        glGenTextures(1, &uranus_texture_handle); // Generate unique texture ID
+        glBindTexture(GL_TEXTURE_2D, uranus_texture_handle); // Bind texture for setup
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // Repeat texture horizontally
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); // Repeat texture vertically
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); // Smooth minification with mipmaps
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // Smooth magnification
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GLsizei(uranus_texture_data.width), GLsizei(uranus_texture_data.height), 0, uranus_texture_data.channels, uranus_texture_data.channel_type, uranus_texture_data.pixels.data()); // Upload texture to GPU
+        glGenerateMipmap(GL_TEXTURE_2D); // Generate mipmaps for efficient scaling
+        m_textures["uranus"] = uranus_texture_handle; // Store handle in map for later use
+        glBindTexture(GL_TEXTURE_2D, 0); // Unbind texture
 
         // Neptun
-        pixel_data neptun_texture_data = texture_loader::file(m_resource_path + "textures/neptune.jpg");
+        pixel_data neptun_texture_data = texture_loader::file(m_resource_path + "textures/neptune.jpg"); // Load image data from file
         GLuint neptun_texture_handle;
-        glGenTextures(1, &neptun_texture_handle);
-        glBindTexture(GL_TEXTURE_2D, neptun_texture_handle);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GLsizei(neptun_texture_data.width), GLsizei(neptun_texture_data.height), 0, neptun_texture_data.channels, neptun_texture_data.channel_type, neptun_texture_data.pixels.data());
-        glGenerateMipmap(GL_TEXTURE_2D);
-        m_textures["neptun"] = neptun_texture_handle;
-        glBindTexture(GL_TEXTURE_2D, 0);
+        glGenTextures(1, &neptun_texture_handle); // Generate unique texture ID
+        glBindTexture(GL_TEXTURE_2D, neptun_texture_handle); // Bind texture for setup
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // Repeat texture horizontally
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); // Repeat texture vertically
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); // Smooth minification with mipmaps
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // Smooth magnification
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GLsizei(neptun_texture_data.width), GLsizei(neptun_texture_data.height), 0, neptun_texture_data.channels, neptun_texture_data.channel_type, neptun_texture_data.pixels.data()); // Upload texture to GPU
+        glGenerateMipmap(GL_TEXTURE_2D); // Generate mipmaps for efficient scaling
+        m_textures["neptun"] = neptun_texture_handle; // Store handle in map for later use
+        glBindTexture(GL_TEXTURE_2D, 0); // Unbind texture
 
         // Sun
-        pixel_data sun_texture_data = texture_loader::file(m_resource_path + "textures/sun.jpg");
+        pixel_data sun_texture_data = texture_loader::file(m_resource_path + "textures/sun.jpg"); // Load image data from file
         GLuint sun_texture_handle;
-        glGenTextures(1, &sun_texture_handle);
-        glBindTexture(GL_TEXTURE_2D, sun_texture_handle);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GLsizei(sun_texture_data.width), GLsizei(sun_texture_data.height), 0, sun_texture_data.channels, sun_texture_data.channel_type, sun_texture_data.pixels.data());
-        glGenerateMipmap(GL_TEXTURE_2D);
-        m_textures["sun"] = sun_texture_handle;
-        glBindTexture(GL_TEXTURE_2D, 0);
+        glGenTextures(1, &sun_texture_handle); // Generate unique texture ID
+        glBindTexture(GL_TEXTURE_2D, sun_texture_handle); // Bind texture for setup
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // Repeat texture horizontally
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); // Repeat texture vertically
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); // Smooth minification with mipmaps
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // Smooth magnification
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GLsizei(sun_texture_data.width), GLsizei(sun_texture_data.height), 0, sun_texture_data.channels, sun_texture_data.channel_type, sun_texture_data.pixels.data()); // Upload texture to GPU
+        glGenerateMipmap(GL_TEXTURE_2D); // Generate mipmaps for efficient scaling
+        m_textures["sun"] = sun_texture_handle; // Store handle in map for later use
+        glBindTexture(GL_TEXTURE_2D, 0); // Unbind texture
 
 
     }
@@ -656,11 +657,11 @@ void ApplicationSolar::renderNode(Node* node, glm::mat4 parent_transform) const 
         else {
             // setting the color for each planet
             if (node->getName() == "mercGeom") { 
-                planet_color = glm::vec3(0.6f, 0.6f, 0.6f); 
+                planet_color = glm::vec3(0.6f, 0.6f, 0.6f); // Dark gray 
                 has_texture = true;
-            }    // Dark gray
+            }    
             else if (node->getName() == "venGeom") { 
-                planet_color = glm::vec3(0.9f, 0.6f, 0.2f);    // Golden amber
+                planet_color = glm::vec3(0.9f, 0.6f, 0.2f);  // Golden amber
                 has_texture = true;
             }
             else if (node->getName() == "earthGeom") {
@@ -668,7 +669,7 @@ void ApplicationSolar::renderNode(Node* node, glm::mat4 parent_transform) const 
                 has_texture = true; 
             }
             else if (node->getName() == "Moon") {
-                planet_color = glm::vec3(0.8f, 0.8f, 0.8f);       // Light gray-white
+                planet_color = glm::vec3(0.8f, 0.8f, 0.8f);  // Light gray-white
                 has_texture = true;
             }
             else if (node->getName() == "marsGeom") {
@@ -751,7 +752,7 @@ void ApplicationSolar::renderNode(Node* node, glm::mat4 parent_transform) const 
         gl::glBindVertexArray(planet_object.vertex_AO);
         glDrawElements(planet_object.draw_mode, planet_object.num_elements, model::INDEX.type, nullptr);
 
-        glBindTexture(GL_TEXTURE_2D, 0);
+        glBindTexture(GL_TEXTURE_2D, 0); // unbind
     }
 
     // Recursive render children
