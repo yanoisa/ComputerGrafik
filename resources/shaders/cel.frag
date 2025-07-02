@@ -1,48 +1,57 @@
 #version 330 core
 
-in vec3 frg_normal;   // Normal in camera/eye space (already normalized)
-in vec3 frg_position; // Position in camera/eye space
+in vec3 frg_normal;     // Normal in camera/eye space
+in vec3 frg_position;   // Position in camera/eye space
+in vec2 frg_texcoord;   // Interpolated texture coordinates
 
-// same uniforms as the original shader
 uniform vec3 LightPosition; // Light position in camera/eye space
 uniform vec3 LightColor;
 uniform float LightIntensity;
-uniform vec3 PlanetColor;
-uniform vec3 EmissiveColor; // sun only
+uniform vec3 PlanetColor;   // Base color for lit objects (will be multiplied with texture)
+uniform vec3 EmissiveColor; //for glowing objects
 
-
-uniform float OutlineThreshold = 0.4; 
+uniform sampler2D PlanetTexture; // Texture sampler uniform
+uniform bool HasTexture;         // Flag to indicate if texture exists
 
 out vec4 frag_color;
 
 void main() {
     //Sun is emissive
-    if (EmissiveColor != vec3(0.0, 0.0, 0.0)) {
-        frag_color = vec4(EmissiveColor, 1.0);
+    if (EmissiveColor != vec3(0.0, 0.0, 0.0) && HasTexture) {
+        frag_color = vec4(vec3(texture(PlanetTexture, frg_texcoord)), 1.0); // Directly output the emissive color
+        return;
+    } else if (EmissiveColor != vec3(0.0, 0.0, 0.0) && !HasTexture) {
+        frag_color = vec4(EmissiveColor, 1.0); // Directly output the emissive color
         return;
     }
 
+    vec3 object_color = PlanetColor; // Declare object_color 
+    if (HasTexture) {
+        object_color = vec3(texture(PlanetTexture, frg_texcoord));
+    }
+
     // Define direction vectors
-    vec3 normal = frg_normal; // Already normalized from vertex shader
+    vec3 normal = normalize(frg_normal); // Ensure normal is normalized
     vec3 view_dir = normalize(-frg_position); // Direction from fragment to camera (origin in view space)
 
-    //  Outline effect 
-    if (dot(normal, view_dir) < OutlineThreshold) {
-        frag_color = vec4(PlanetColor, 1.0);
+    // Outline effect (more of a rim/back-facing color in this context)
+    // If the angle between the normal and view_dir is large (surface facing away)
+    if (dot(normal, view_dir) < 0.6) {
+        frag_color = vec4(PlanetColor, 1.0); // Use a distinct outline color
         return; // Exit after drawing the outline pixel
     }
 
-    vec3 ambient = 0.1 * PlanetColor; // ambient strength
+    vec3 ambient = 0.1 * object_color; // ambient strength
 
     // Light direction (from fragment to light source)
     vec3 light_dir = normalize(LightPosition - frg_position);
 
-
     // Diffuse component (how much light reflects based on angle to light)
     float diff = max(dot(normal, light_dir), 0.0);
-    vec3 diffuse = diff * LightColor * PlanetColor * LightIntensity;
 
-    // Specular component (highlights, reflections)
+    vec3 diffuse = diff * LightColor * object_color * LightIntensity;
+
+    // Specular component (highlights, reflections) - often simplified or removed in cel shading
     vec3 reflect_dir = reflect(-light_dir, normal);
     float spec = pow(max(dot(view_dir, reflect_dir), 0.0), 32.0); // 32.0 is shininess exponent
     vec3 specular = spec * LightColor * LightIntensity * 0.5; // specular color strength

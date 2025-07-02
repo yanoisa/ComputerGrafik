@@ -119,7 +119,6 @@ ApplicationSolar::~ApplicationSolar() {
     glDeleteBuffers(1, &star_object.vertex_BO);
     glDeleteVertexArrays(1, &star_object.vertex_AO);
 
-    // *** NEW: Delete textures from the map ***
     for (auto const& [key, val] : m_textures) {
         glDeleteTextures(1, &m_textures.at(key));
     }
@@ -483,6 +482,20 @@ void ApplicationSolar::initializeTextures() {
         m_textures["neptun"] = neptun_texture_handle;
         glBindTexture(GL_TEXTURE_2D, 0);
 
+        // Sun
+        pixel_data sun_texture_data = texture_loader::file(m_resource_path + "textures/sun.jpg");
+        GLuint sun_texture_handle;
+        glGenTextures(1, &sun_texture_handle);
+        glBindTexture(GL_TEXTURE_2D, sun_texture_handle);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GLsizei(sun_texture_data.width), GLsizei(sun_texture_data.height), 0, sun_texture_data.channels, sun_texture_data.channel_type, sun_texture_data.pixels.data());
+        glGenerateMipmap(GL_TEXTURE_2D);
+        m_textures["sun"] = sun_texture_handle;
+        glBindTexture(GL_TEXTURE_2D, 0);
+
 
     }
     catch (const std::exception& e) {
@@ -638,6 +651,7 @@ void ApplicationSolar::renderNode(Node* node, glm::mat4 parent_transform) const 
 
         if (node->getName() == "SunGeom") {
             emissive_color = glm::vec3(1.0f, 0.8f, 0.0f);
+            has_texture = true;
         }
         else {
             // setting the color for each planet
@@ -684,7 +698,7 @@ void ApplicationSolar::renderNode(Node* node, glm::mat4 parent_transform) const 
         glUniform3fv(current_shader.u_locs.at("EmissiveColor"), 1, glm::value_ptr(emissive_color));
         glUniform3fv(current_shader.u_locs.at("PlanetColor"), 1, glm::value_ptr(planet_color));
 
-        // Texture binding and uniforms ***
+        // Texture binding and uniforms 
         glUniform1i(current_shader.u_locs.at("HasTexture"), has_texture);
         if (has_texture) {
             GLuint texture_to_bind = 0; // Default to no texture
@@ -715,6 +729,10 @@ void ApplicationSolar::renderNode(Node* node, glm::mat4 parent_transform) const 
             else if (node->getName() == "neptGeom" && m_textures.count("neptun")) { // Check for Neptun texture
                 texture_to_bind = m_textures.at("neptun");
             }
+            else if (node->getName() == "SunGeom" && m_textures.count("sun")) {
+                texture_to_bind = m_textures.at("sun");
+            }
+            
 
             if (texture_to_bind != 0) {
                 glActiveTexture(GL_TEXTURE0);
